@@ -93,6 +93,23 @@
         }
         .modal-content h3 { margin-bottom: 12px; color: #f5c542; }
         .modal-content p { color: #aaa; font-size: 14px; margin-bottom: 6px; }
+        .loading { text-align: center; color: #888; padding: 40px; }
+        .recipient-preview {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #222;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        .recipient-preview.show { display: flex; }
+        .recipient-preview img {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: #333;
+        }
+        .recipient-preview .name { font-size: 14px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -103,67 +120,23 @@
 
     <div class="section">
         <div class="section-title">💎 Telegram Stars</div>
-        <div class="card" onclick="openBuy('stars', '50 звёзд', 125, 50)">
-            <div class="card-left">
-                <span class="card-icon">⭐</span>
-                <div class="card-info"><h3>50 звёзд</h3><p>Моментальная доставка</p></div>
-            </div>
-            <span class="card-price">125 TON</span>
-        </div>
-        <div class="card" onclick="openBuy('stars', '100 звёзд', 250, 100)">
-            <div class="card-left">
-                <span class="card-icon">⭐</span>
-                <div class="card-info"><h3>100 звёзд</h3><p>Моментальная доставка</p></div>
-            </div>
-            <span class="card-price">250 TON</span>
-        </div>
-        <div class="card" onclick="openBuy('stars', '500 звёзд', 1250, 500)">
-            <div class="card-left">
-                <span class="card-icon">⭐</span>
-                <div class="card-info"><h3>500 звёзд</h3><p>Моментальная доставка</p></div>
-            </div>
-            <span class="card-price">1 250 TON</span>
-        </div>
-        <div class="card" onclick="openBuy('stars', '1000 звёзд', 2500, 1000)">
-            <div class="card-left">
-                <span class="card-icon">⭐</span>
-                <div class="card-info"><h3>1000 звёзд</h3><p>Моментальная доставка</p></div>
-            </div>
-            <span class="card-price">2 500 TON</span>
-        </div>
+        <div id="stars-list" class="loading">Загрузка цен...</div>
     </div>
 
     <div class="section">
         <div class="section-title">👑 Telegram Premium</div>
-        <div class="card" onclick="openBuy('premium', 'Premium 3 мес.', 8.5, 3)">
-            <div class="card-left">
-                <span class="card-icon">👑</span>
-                <div class="card-info"><h3>Premium 3 месяца</h3><p>Без верификации</p></div>
-            </div>
-            <span class="card-price">8.5 TON</span>
-        </div>
-        <div class="card" onclick="openBuy('premium', 'Premium 6 мес.', 17, 6)">
-            <div class="card-left">
-                <span class="card-icon">👑</span>
-                <div class="card-info"><h3>Premium 6 месяцев</h3><p>Без верификации</p></div>
-            </div>
-            <span class="card-price">17 TON</span>
-        </div>
-        <div class="card" onclick="openBuy('premium', 'Premium 12 мес.', 33, 12)">
-            <div class="card-left">
-                <span class="card-icon">👑</span>
-                <div class="card-info"><h3>Premium 12 месяцев</h3><p>Без верификации</p></div>
-            </div>
-            <span class="card-price">33 TON</span>
-        </div>
+        <div id="premium-list" class="loading">Загрузка цен...</div>
     </div>
 
     <div class="modal" id="modal">
         <div class="modal-content">
             <h3 id="modalTitle">Покупка</h3>
             <p id="modalDesc"></p>
-            <p id="modalPrice"></p>
-            <input class="input" type="text" id="recipientInput" placeholder="Username получателя (@username)">
+            <input class="input" type="text" id="recipientInput" placeholder="Username получателя (с @ или без)" oninput="searchRecipient()">
+            <div class="recipient-preview" id="recipientPreview">
+                <img id="recipientAvatar" src="" alt="">
+                <span class="name" id="recipientName"></span>
+            </div>
             <button class="btn" id="buyBtn" onclick="confirmBuy()">Подтвердить покупку</button>
             <button class="btn" style="background:#444;color:#fff;margin-top:6px" onclick="closeModal()">Отмена</button>
         </div>
@@ -174,19 +147,113 @@
         tg.expand();
 
         let currentItem = null;
+        let foundRecipient = null;
+        const API_KEY = 'nyIluP49rLSVOIt7xIy4EksysIIOiyYOlKuHSuqzuoE=';
+
+        // Загрузка цен
+        async function loadPrices() {
+            try {
+                const resp = await fetch('https://v1.fragmentapi.com/api/v1/partner/premium/packages', {
+                    headers: { 'API-Key': API_KEY }
+                });
+                const packages = await resp.json();
+
+                let premiumHTML = '';
+                packages.forEach(pkg => {
+                    const price = (pkg.ton_value * 1.02).toFixed(1);
+                    premiumHTML += `
+                        <div class="card" onclick="openBuy('premium', 'Premium ${pkg.months} мес.', ${price}, ${pkg.months})">
+                            <div class="card-left">
+                                <span class="card-icon">👑</span>
+                                <div class="card-info"><h3>Premium ${pkg.months} месяца</h3></div>
+                            </div>
+                            <span class="card-price">${price} GRAM</span>
+                        </div>`;
+                });
+                document.getElementById('premium-list').innerHTML = premiumHTML;
+
+                const starPrices = [
+                    { qty: 50, base: 0.625 },
+                    { qty: 100, base: 1.25 },
+                    { qty: 500, base: 6.25 },
+                    { qty: 1000, base: 12.5 }
+                ];
+                let starsHTML = '';
+                starPrices.forEach(s => {
+                    const price = (s.base * 1.02).toFixed(2);
+                    starsHTML += `
+                        <div class="card" onclick="openBuy('stars', '${s.qty} звёзд', ${price}, ${s.qty})">
+                            <div class="card-left">
+                                <span class="card-icon">⭐</span>
+                                <div class="card-info"><h3>${s.qty} звёзд</h3></div>
+                            </div>
+                            <span class="card-price">${price} GRAM</span>
+                        </div>`;
+                });
+                document.getElementById('stars-list').innerHTML = starsHTML;
+
+            } catch (e) {
+                document.getElementById('stars-list').innerHTML = 'Ошибка загрузки цен';
+                document.getElementById('premium-list').innerHTML = 'Ошибка загрузки цен';
+            }
+        }
+
+        loadPrices();
+
+        // Поиск получателя
+        async function searchRecipient() {
+            const input = document.getElementById('recipientInput').value.trim();
+            const preview = document.getElementById('recipientPreview');
+            const avatar = document.getElementById('recipientAvatar');
+            const name = document.getElementById('recipientName');
+            
+            if (input.length < 2) {
+                preview.classList.remove('show');
+                foundRecipient = null;
+                return;
+            }
+
+            const username = input.startsWith('@') ? input.substring(1) : input;
+
+            try {
+                const resp = await fetch(`https://v1.fragmentapi.com/api/v1/partner/premium/recipient/search?username=${username}&months=3`, {
+                    headers: { 'API-Key': API_KEY }
+                });
+                const data = await resp.json();
+
+                if (data.success && !data.myself) {
+                    foundRecipient = data;
+                    name.textContent = data.name || username;
+                    if (data.photo) {
+                        avatar.src = data.photo;
+                    } else {
+                        avatar.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23333" width="40" height="40"/><text fill="%23888" x="50%25" y="55%25" text-anchor="middle" font-size="20">?</text></svg>';
+                    }
+                    preview.classList.add('show');
+                } else {
+                    preview.classList.remove('show');
+                    foundRecipient = null;
+                }
+            } catch (e) {
+                preview.classList.remove('show');
+                foundRecipient = null;
+            }
+        }
 
         function openBuy(type, name, price, quantity) {
             currentItem = { type, name, price, quantity };
             document.getElementById('modalTitle').textContent = '🛒 ' + name;
-            document.getElementById('modalDesc').textContent = 'Цена: ' + price + ' TON';
-            document.getElementById('modalPrice').textContent = 'Введите username получателя:';
+            document.getElementById('modalDesc').textContent = 'Цена: ' + price + ' GRAM';
             document.getElementById('recipientInput').value = '';
+            document.getElementById('recipientPreview').classList.remove('show');
+            foundRecipient = null;
             document.getElementById('modal').classList.add('active');
         }
 
         function closeModal() {
             document.getElementById('modal').classList.remove('active');
             currentItem = null;
+            foundRecipient = null;
         }
 
         function confirmBuy() {
