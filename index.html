@@ -111,8 +111,8 @@
         .recipient-box .status { margin-left: auto; font-size: 18px; }
         .error-text {
             color: #ff4444;
-            font-size: 12px;
-            margin-top: 6px;
+            font-size: 13px;
+            margin-top: 8px;
             display: none;
         }
         .error-text.show { display: block; }
@@ -223,29 +223,18 @@
 
             searchTimeout = setTimeout(async () => {
                 try {
-                    // Пробуем получить инфу через Telegram Web App API
                     const resp = await fetch(`https://t.me/${username}`);
                     const html = await resp.text();
-                    
-                    // Ищем имя пользователя в meta-тегах
-                    const nameMatch = html.match(/<meta property="og:title" content="([^"]+)"/);
-                    const photoMatch = html.match(/<meta property="og:image" content="([^"]+)"/);
                     const descMatch = html.match(/<meta property="og:description" content="([^"]+)"/);
 
-                    if (nameMatch && !descMatch?.includes("Telegram: Contact")) {
-                        // Нашли пользователя
-                        foundRecipient = { name: nameMatch[1], recipient: username };
-                        name.textContent = nameMatch[1];
-                        status.textContent = '✅';
-                        if (photoMatch) {
-                            avatar.src = photoMatch[1];
-                        } else {
-                            avatar.src = avatarFallback(username);
-                        }
+                    if (descMatch && !descMatch[1].includes("Telegram: Contact")) {
+                        foundRecipient = { name: username, recipient: username };
+                        name.textContent = username;
+                        status.textContent = '';
+                        avatar.src = avatarFallback(username);
                         box.classList.add('show');
                         errorText.classList.remove('show');
                     } else {
-                        // Не нашли
                         foundRecipient = { name: username, recipient: username };
                         name.textContent = username;
                         status.textContent = '';
@@ -254,7 +243,6 @@
                         errorText.classList.add('show');
                     }
                 } catch (e) {
-                    // Ошибка — показываем что есть
                     foundRecipient = { name: username, recipient: username };
                     name.textContent = username;
                     status.textContent = '';
