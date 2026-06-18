@@ -114,7 +114,6 @@
         let userBalance = 0;
         let searchTimeout = null;
         const WALLET_ADDRESS = "UQBoaCWXtSkgoygDPUns7vHUZFOuwDRzdZ5upaGXsavWzHc9";
-        const USER_ID = tg.initDataUnsafe?.user?.id || 0;
 
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://alan7ipp.github.io/StarGram/tonconnect-manifest.json',
@@ -227,7 +226,7 @@
                 updateBalanceDisplay();
                 tg.sendData(JSON.stringify({ action: 'order', type: currentItem.type, name: currentItem.name, price: currentItem.price, quantity: currentItem.quantity, recipient: recipient, paid_from_balance: true }));
                 closeModal('modalBuy');
-                showSuccess('✅ Покупка совершена!', '🛍 ' + currentItem.name + '\n📩 ' + recipient + '\n💰 -' + price + ' GRAM');
+                showSuccess('✅ Покупка совершена!', '🛍 ' + currentItem.name + '\n📩 ' + recipient + '\n💰 -' + price + ' GRAM\n\nУведомление отправлено в ЛС');
             } else {
                 openDeposit();
             }
@@ -253,10 +252,10 @@
                 updateBalanceDisplay();
                 tg.sendData(JSON.stringify({ action: 'deposit', amount: amount }));
                 closeModal('modalDeposit');
-                showSuccess('✅ Баланс пополнен!', '💰 +' + amount + ' GRAM\nБаланс: ' + userBalance.toFixed(1) + ' GRAM');
+                showSuccess('✅ Баланс пополнен!', '💰 +' + amount + ' GRAM\nБаланс: ' + userBalance.toFixed(1) + ' GRAM\n\nУведомление отправлено в ЛС');
             } catch (e) {
                 if (e.message && e.message.includes('declined')) {
-                    tg.showAlert('Платёж отменён. Попробуйте снова.');
+                    tg.showAlert('Платёж отменён.');
                 } else {
                     tg.showAlert('Ошибка. Проверьте кошелёк.');
                 }

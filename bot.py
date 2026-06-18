@@ -194,10 +194,15 @@ async def handle_webapp(message: types.Message):
         dep_id = hashlib.md5(f"{buyer.id}{time.time()}".encode()).hexdigest()[:8]
         create_deposit(dep_id, buyer.id, amount)
         add_balance(buyer.id, amount)
-        await message.answer(format_text(f"✅ Баланс пополнен на {amount} GRAM\n\n💰 Текущий баланс: {get_balance(buyer.id)} GRAM"), parse_mode=ParseMode.HTML)
+        await message.answer(
+            format_text(f"✅ Баланс пополнен на {amount} GRAM\n\n💰 Текущий баланс: {get_balance(buyer.id)} GRAM"),
+            parse_mode=ParseMode.HTML
+        )
         for admin_id in ADMIN_IDS:
             try:
-                await bot.send_message(admin_id, format_text(f"💰 Пополнение!\n👤 @{buyer.username or buyer.full_name} (ID: {buyer.id})\n💎 +{amount} GRAM\nБаланс: {get_balance(buyer.id)} GRAM"), parse_mode=ParseMode.HTML)
+                await bot.send_message(admin_id,
+                    format_text(f"💰 Пополнение!\n\n👤 @{buyer.username or buyer.full_name} (ID: {buyer.id})\n💎 +{amount} GRAM\n\n💰 Баланс: {get_balance(buyer.id)} GRAM"),
+                    parse_mode=ParseMode.HTML)
             except: pass
         return
 
@@ -224,10 +229,31 @@ async def handle_webapp(message: types.Message):
         if paid_from_balance:
             if subtract_balance(buyer.id, order_price):
                 create_order(order_id, buyer.id, order_type, item_text, order_quantity, recipient, order_price)
-                await message.answer(format_text(f"✅ Заказ #{order_id}\n🛍 {item_icon} {item_text}\n📩 {recipient}\n💰 С баланса: -{order_price} GRAM\nОстаток: {get_balance(buyer.id)} GRAM"), parse_mode=ParseMode.HTML)
+                # Уведомление покупателю
+                await message.answer(
+                    format_text(
+                        f"✅ Заказ #{order_id} оформлен!\n\n"
+                        f"🛍 Товар: {item_icon} {item_text}\n"
+                        f"📩 Получатель: {recipient}\n"
+                        f"💰 Списано с баланса: {order_price} GRAM\n"
+                        f"💎 Остаток: {get_balance(buyer.id)} GRAM\n\n"
+                        f"⏳ Ожидайте — мы отправим товар в ближайшее время."
+                    ),
+                    parse_mode=ParseMode.HTML
+                )
+                # Уведомление админам
                 for admin_id in ADMIN_IDS:
                     try:
-                        await bot.send_message(admin_id, format_text(f"🔔 Заказ #{order_id}!\n👤 @{buyer.username or buyer.full_name}\n🛍 {item_icon} {item_text}\n📩 {recipient}\n💰 {order_price} GRAM (с баланса)\n⚡ Отправь товар!"), parse_mode=ParseMode.HTML)
+                        await bot.send_message(admin_id,
+                            format_text(
+                                f"🔔 Новый заказ #{order_id}!\n\n"
+                                f"👤 Покупатель: @{buyer.username or buyer.full_name} (ID: {buyer.id})\n"
+                                f"🛍 Товар: {item_icon} {item_text}\n"
+                                f"📩 Получатель: {recipient}\n"
+                                f"💰 Сумма: {order_price} GRAM (с баланса)\n\n"
+                                f"⚡ Зайди на Fragment и отправь товар!"
+                            ),
+                            parse_mode=ParseMode.HTML)
                     except: pass
             else:
                 await message.answer(format_text("❌ Недостаточно средств на балансе"), parse_mode=ParseMode.HTML)
@@ -235,10 +261,31 @@ async def handle_webapp(message: types.Message):
             create_order(order_id, buyer.id, order_type, item_text, order_quantity, recipient, order_price)
             nano_amount = int(order_price * 1_000_000_000)
             ton_link = f"ton://transfer/{WALLET_ADDRESS}?amount={nano_amount}&text=StarGram-{order_id}"
-            await message.answer(format_text(f"🛒 Заказ #{order_id}\n🛍 {item_icon} {item_text}\n📩 {recipient}\n💰 {order_price} GRAM\n👇 Оплатите через Tonkeeper"), reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="💳 Оплатить", url=ton_link)]]), parse_mode=ParseMode.HTML)
+            await message.answer(
+                format_text(
+                    f"🛒 Заказ #{order_id}\n\n"
+                    f"🛍 Товар: {item_icon} {item_text}\n"
+                    f"📩 Получатель: {recipient}\n"
+                    f"💰 Сумма к оплате: {order_price} GRAM\n\n"
+                    f"👇 Нажмите кнопку для оплаты через Tonkeeper"
+                ),
+                reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                    [InlineKeyboardButton(text="💳 Оплатить через Tonkeeper", url=ton_link)]
+                ]),
+                parse_mode=ParseMode.HTML
+            )
             for admin_id in ADMIN_IDS:
                 try:
-                    await bot.send_message(admin_id, format_text(f"🔔 Заказ #{order_id}\n👤 @{buyer.username or buyer.full_name}\n🛍 {item_icon} {item_text}\n📩 {recipient}\n💰 {order_price} GRAM\n⏳ Ожидает оплаты"), parse_mode=ParseMode.HTML)
+                    await bot.send_message(admin_id,
+                        format_text(
+                            f"🔔 Новый заказ #{order_id}!\n\n"
+                            f"👤 @{buyer.username or buyer.full_name} (ID: {buyer.id})\n"
+                            f"🛍 {item_icon} {item_text}\n"
+                            f"📩 {recipient}\n"
+                            f"💰 {order_price} GRAM\n\n"
+                            f"⏳ Ожидает оплаты..."
+                        ),
+                        parse_mode=ParseMode.HTML)
                 except: pass
 
 
