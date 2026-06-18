@@ -109,6 +109,13 @@
         .recipient-box .info .name { font-size: 15px; font-weight: bold; color: #fff; }
         .recipient-box .info .sub { font-size: 12px; color: #888; }
         .recipient-box .status { margin-left: auto; font-size: 18px; }
+        .error-text {
+            color: #ff4444;
+            font-size: 12px;
+            margin-top: 6px;
+            display: none;
+        }
+        .error-text.show { display: block; }
     </style>
 </head>
 <body>
@@ -140,6 +147,7 @@
                 </div>
                 <span class="status" id="recipientStatus"></span>
             </div>
+            <div class="error-text" id="errorText">⚠️ Пользователь не найден в Telegram</div>
             <button class="btn" id="buyBtn" onclick="confirmBuy()">Подтвердить покупку</button>
             <button class="btn" style="background:#444;color:#fff;margin-top:6px" onclick="closeModal()">Отмена</button>
         </div>
@@ -152,10 +160,11 @@
         let currentItem = null;
         let foundRecipient = null;
         let tonPrice = 3.5;
+        let searchTimeout = null;
 
         const PRICES_USDT = {
             stars: { 50: 0.75, 100: 1.50, 500: 7.50, 1000: 15.00 },
-            premium: { 1: 11.99, 6: 15.99, 12: 28.99 }
+            premium: { 1: 11.99, 3: 11.99, 6: 15.99, 12: 28.99 }
         };
 
         function usdtToGram(usdt) {
@@ -174,7 +183,12 @@
             let premiumHTML = '';
             for (const [months, usdt] of Object.entries(PRICES_USDT.premium)) {
                 const gram = usdtToGram(usdt);
-                premiumHTML += `<div class="card" onclick="openBuy('premium', 'Premium ${months} мес.', ${gram}, ${months})"><div class="card-left"><span class="card-icon">👑</span><div class="card-info"><h3>Premium ${months} месяц(ев)</h3></div></div><span class="card-price">${gram} GRAM</span></div>`;
+                let label;
+                if (months == 1) label = '1 месяц';
+                else if (months == 3) label = '3 месяца';
+                else if (months == 6) label = '6 месяцев';
+                else if (months == 12) label = '12 месяцев';
+                premiumHTML += `<div class="card" onclick="openBuy('premium', 'Premium на ${label}', ${gram}, ${months})"><div class="card-left"><span class="card-icon">👑</span><div class="card-info"><h3>Premium на ${label}</h3></div></div><span class="card-price">${gram} GRAM</span></div>`;
             }
             document.getElementById('premium-list').innerHTML = premiumHTML;
 
@@ -188,25 +202,72 @@
 
         loadPrices();
 
-        function searchRecipient() {
+        async function searchRecipient() {
             const input = document.getElementById('recipientInput').value.trim();
             const box = document.getElementById('recipientBox');
             const avatar = document.getElementById('recipientAvatar');
             const name = document.getElementById('recipientName');
             const status = document.getElementById('recipientStatus');
+            const errorText = document.getElementById('errorText');
+
+            if (searchTimeout) clearTimeout(searchTimeout);
 
             if (input.length < 2) {
                 box.classList.remove('show');
+                errorText.classList.remove('show');
                 foundRecipient = null;
                 return;
             }
 
             const username = input.startsWith('@') ? input.substring(1) : input;
-            foundRecipient = { name: username, recipient: username };
-            name.textContent = username;
-            status.textContent = '';
-            avatar.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44"><rect fill="%23333" width="44" height="44" rx="22"/><text fill="%23888" x="22" y="28" text-anchor="middle" font-size="20" font-family="sans-serif">' + (username[0] || '?').toUpperCase() + '</text></svg>');
-            box.classList.add('show');
+
+            searchTimeout = setTimeout(async () => {
+                try {
+                    // Пробуем получить инфу через Telegram Web App API
+                    const resp = await fetch(`https://t.me/${username}`);
+                    const html = await resp.text();
+                    
+                    // Ищем имя пользователя в meta-тегах
+                    const nameMatch = html.match(/<meta property="og:title" content="([^"]+)"/);
+                    const photoMatch = html.match(/<meta property="og:image" content="([^"]+)"/);
+                    const descMatch = html.match(/<meta property="og:description" content="([^"]+)"/);
+
+                    if (nameMatch && !descMatch?.includes("Telegram: Contact")) {
+                        // Нашли пользователя
+                        foundRecipient = { name: nameMatch[1], recipient: username };
+                        name.textContent = nameMatch[1];
+                        status.textContent = '✅';
+                        if (photoMatch) {
+                            avatar.src = photoMatch[1];
+                        } else {
+                            avatar.src = avatarFallback(username);
+                        }
+                        box.classList.add('show');
+                        errorText.classList.remove('show');
+                    } else {
+                        // Не нашли
+                        foundRecipient = { name: username, recipient: username };
+                        name.textContent = username;
+                        status.textContent = '';
+                        avatar.src = avatarFallback(username);
+                        box.classList.add('show');
+                        errorText.classList.add('show');
+                    }
+                } catch (e) {
+                    // Ошибка — показываем что есть
+                    foundRecipient = { name: username, recipient: username };
+                    name.textContent = username;
+                    status.textContent = '';
+                    avatar.src = avatarFallback(username);
+                    box.classList.add('show');
+                    errorText.classList.remove('show');
+                }
+            }, 500);
+        }
+
+        function avatarFallback(username) {
+            const letter = (username[0] || '?').toUpperCase();
+            return 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44"><rect fill="%23333" width="44" height="44" rx="22"/><text fill="%23888" x="22" y="28" text-anchor="middle" font-size="20" font-family="sans-serif">' + letter + '</text></svg>');
         }
 
         function openBuy(type, name, price, quantity) {
@@ -215,6 +276,7 @@
             document.getElementById('modalDesc').textContent = 'Цена: ' + price + ' GRAM';
             document.getElementById('recipientInput').value = '';
             document.getElementById('recipientBox').classList.remove('show');
+            document.getElementById('errorText').classList.remove('show');
             foundRecipient = null;
             document.getElementById('modal').classList.add('active');
             setTimeout(function() { document.getElementById('recipientInput').focus(); }, 300);
