@@ -3,6 +3,8 @@ import logging
 import os
 import json
 import aiohttp
+import hashlib
+import time
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from aiogram.filters import Command
@@ -13,6 +15,7 @@ load_dotenv()
 
 TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_IDS = list(map(int, os.getenv("ADMIN_IDS").split(",")))
+WALLET_ADDRESS = "UQBoaCWXtSkgoygDPUns7vHUZFOuwDRzdZ5upaGXsavWzHc9"
 
 logging.basicConfig(level=logging.INFO)
 
@@ -21,10 +24,11 @@ dp = Dispatcher()
 
 PRICES_USDT = {
     "stars": {50: 0.75, 100: 1.50, 500: 7.50, 1000: 15.00},
-    "premium": {1: 11.99, 6: 15.99, 12: 28.99}
+    "premium": {1: 11.99, 3: 11.99, 6: 15.99, 12: 28.99}
 }
 
 ton_price_cache = {"price": 0, "updated": 0}
+pending_orders = {}
 
 async def get_ton_price() -> float:
     global ton_price_cache
@@ -155,7 +159,7 @@ async def handle_webapp(message: types.Message):
     data = json.loads(message.web_app_data.data)
     order_type = data.get("type")
     order_name = data.get("name")
-    order_price = data.get("price")
+    order_price = float(data.get("price"))
     order_quantity = data.get("quantity")
     recipient = data.get("recipient")
     buyer = message.from_user
@@ -170,13 +174,34 @@ async def handle_webapp(message: types.Message):
         item_icon = "🎁"
         item_text = order_name
 
+    order_id = hashlib.md5(f"{buyer.id}{time.time()}".encode()).hexdigest()[:8]
+    nano_amount = int(order_price * 1_000_000_000)
+    ton_link = f"ton://transfer/{WALLET_ADDRESS}?amount={nano_amount}&text=StarGram-{order_id}"
+
+    pay_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💳 Оплатить через Tonkeeper", url=ton_link)]
+    ])
+
+    await message.answer(
+        format_text(
+            f"🛒 Заказ #{order_id}\n\n"
+            f"🛍 Товар: {item_icon} {item_text}\n"
+            f"📩 Получатель: {recipient}\n"
+            f"💰 Сумма к оплате: {order_price} GRAM\n\n"
+            f"👇 Нажмите кнопку ниже для оплаты через Tonkeeper\n\n"
+            f"📋 Адрес: {WALLET_ADDRESS[:10]}...{WALLET_ADDRESS[-10:]}"
+        ),
+        reply_markup=pay_keyboard,
+        parse_mode=ParseMode.HTML
+    )
+
     admin_text = format_text(
-        f"💎 Новая покупка!\n\n"
+        f"🔔 Новый заказ #{order_id}!\n\n"
         f"👤 Покупатель: @{buyer.username or buyer.full_name or 'нет'} (ID: {buyer.id})\n"
         f"🛍 Товар: {item_icon} {item_text}\n"
         f"📩 Получатель: {recipient}\n"
         f"💰 Сумма: {order_price} GRAM\n\n"
-        f"✅ Зайди на Fragment и отправь товар!"
+        f"⏳ Ожидаем оплату..."
     )
     for admin_id in ADMIN_IDS:
         try:
@@ -184,16 +209,10 @@ async def handle_webapp(message: types.Message):
         except:
             pass
 
-    await message.answer(
-        format_text(f"✅ Заказ принят!\n\n🛍 Товар: {item_icon} {item_text}\n📩 Получатель: {recipient}\n💰 Сумма: {order_price} GRAM\n\n⏳ Ожидайте — мы отправим товар в ближайшее время."),
-        parse_mode=ParseMode.HTML
-    )
-
 
 async def main():
     print("Бот запущен!")
-    ton_price = await get_ton_price()
-    print(f"✅ Курс TON: ${ton_price:.2f}")
+    print(f"💰 Кошелёк: {WALLET_ADDRESS}")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":

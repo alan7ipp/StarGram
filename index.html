@@ -116,18 +116,6 @@
             display: none;
         }
         .error-text.show { display: block; }
-        .pay-section {
-            display: none;
-            text-align: center;
-            padding: 12px 0;
-        }
-        .pay-section.show { display: block; }
-        .pay-amount {
-            font-size: 28px;
-            font-weight: bold;
-            color: #4caf50;
-            margin: 10px 0;
-        }
     </style>
 </head>
 <body>
@@ -160,13 +148,7 @@
                 <span class="status" id="recipientStatus"></span>
             </div>
             <div class="error-text" id="errorText">⚠️ Пользователь не найден в Telegram</div>
-            <div class="pay-section" id="paySection">
-                <p>К оплате:</p>
-                <div class="pay-amount" id="payAmount"></div>
-                <button class="btn" onclick="payWithTonkeeper()">💳 Оплатить через Tonkeeper</button>
-                <button class="btn" style="background:#444;color:#fff;margin-top:6px" onclick="sendOrderToBot()">📩 Отправить заказ боту (тест)</button>
-            </div>
-            <button class="btn" id="confirmBtn" onclick="confirmBuy()">Подтвердить покупку</button>
+            <button class="btn" onclick="confirmBuy()">Подтвердить покупку</button>
             <button class="btn" style="background:#444;color:#fff;margin-top:6px" onclick="closeModal()">Отмена</button>
         </div>
     </div>
@@ -179,8 +161,6 @@
         let foundRecipient = null;
         let tonPrice = 3.5;
         let searchTimeout = null;
-
-        const WALLET_ADDRESS = "UQBoaCWXtSkgoygDPUns7vHUZFOuwDRzdZ5upaGXsavWzHc9";
 
         const PRICES_USDT = {
             stars: { 50: 0.75, 100: 1.50, 500: 7.50, 1000: 15.00 },
@@ -222,7 +202,7 @@
 
         loadPrices();
 
-        function searchRecipient() {
+        async function searchRecipient() {
             const input = document.getElementById('recipientInput').value.trim();
             const box = document.getElementById('recipientBox');
             const avatar = document.getElementById('recipientAvatar');
@@ -240,12 +220,37 @@
             }
 
             const username = input.startsWith('@') ? input.substring(1) : input;
-            foundRecipient = { name: username, recipient: username };
-            name.textContent = username;
-            status.textContent = '';
-            avatar.src = avatarFallback(username);
-            box.classList.add('show');
-            errorText.classList.remove('show');
+
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const resp = await fetch(`https://t.me/${username}`);
+                    const html = await resp.text();
+                    const descMatch = html.match(/<meta property="og:description" content="([^"]+)"/);
+
+                    if (descMatch && !descMatch[1].includes("Telegram: Contact")) {
+                        foundRecipient = { name: username, recipient: username };
+                        name.textContent = username;
+                        status.textContent = '✅';
+                        avatar.src = avatarFallback(username);
+                        box.classList.add('show');
+                        errorText.classList.remove('show');
+                    } else {
+                        foundRecipient = { name: username, recipient: username };
+                        name.textContent = username;
+                        status.textContent = '';
+                        avatar.src = avatarFallback(username);
+                        box.classList.add('show');
+                        errorText.classList.add('show');
+                    }
+                } catch (e) {
+                    foundRecipient = { name: username, recipient: username };
+                    name.textContent = username;
+                    status.textContent = '';
+                    avatar.src = avatarFallback(username);
+                    box.classList.add('show');
+                    errorText.classList.remove('show');
+                }
+            }, 500);
         }
 
         function avatarFallback(username) {
@@ -260,8 +265,6 @@
             document.getElementById('recipientInput').value = '';
             document.getElementById('recipientBox').classList.remove('show');
             document.getElementById('errorText').classList.remove('show');
-            document.getElementById('paySection').classList.remove('show');
-            document.getElementById('confirmBtn').style.display = 'block';
             foundRecipient = null;
             document.getElementById('modal').classList.add('active');
             setTimeout(function() { document.getElementById('recipientInput').focus(); }, 300);
@@ -280,48 +283,7 @@
                 return;
             }
             if (!currentItem) return;
-
-            // Показываем секцию оплаты
-            document.getElementById('payAmount').textContent = currentItem.price + ' GRAM';
-            document.getElementById('paySection').classList.add('show');
-            document.getElementById('confirmBtn').style.display = 'none';
-        }
-
-        function payWithTonkeeper() {
-            if (!currentItem) return;
-            const recipient = document.getElementById('recipientInput').value.trim();
-            const nanoAmount = Math.floor(currentItem.price * 1_000_000_000);
-            const comment = 'StarGram-' + Date.now().toString(36);
-            const tonLink = 'ton://transfer/' + WALLET_ADDRESS + '?amount=' + nanoAmount + '&text=' + comment;
-
-            // Отправляем данные боту
-            const data = {
-                type: currentItem.type,
-                name: currentItem.name,
-                price: currentItem.price,
-                quantity: currentItem.quantity,
-                recipient: recipient,
-                comment: comment
-            };
-            tg.sendData(JSON.stringify(data));
-
-            // Открываем Tonkeeper
-            window.location.href = tonLink;
-            setTimeout(function() { tg.close(); }, 1000);
-        }
-
-        function sendOrderToBot() {
-            const recipient = document.getElementById('recipientInput').value.trim();
-            if (!recipient || !currentItem) return;
-
-            const data = {
-                type: currentItem.type,
-                name: currentItem.name,
-                price: currentItem.price,
-                quantity: currentItem.quantity,
-                recipient: recipient
-            };
-            tg.sendData(JSON.stringify(data));
+            tg.sendData(JSON.stringify({ type: currentItem.type, name: currentItem.name, price: currentItem.price, quantity: currentItem.quantity, recipient: recipient }));
             tg.close();
         }
     </script>
