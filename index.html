@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StarGram Market</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -55,24 +56,12 @@
             font-weight: bold;
             cursor: pointer;
             white-space: nowrap;
-            transition: 0.2s;
             color: #aaa;
         }
-        .tab.active {
-            background: #f5c542;
-            color: #000;
-            border-color: #f5c542;
-        }
-        .tab:hover { background: #222; }
-        .tab.active:hover { background: #f5c542; }
+        .tab.active { background: #f5c542; color: #000; border-color: #f5c542; }
         .section { margin-bottom: 20px; display: none; }
         .section.active { display: block; }
-        .section-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            color: #f5c542;
-        }
+        .section-title { font-size: 18px; font-weight: bold; margin-bottom: 12px; color: #f5c542; }
         .card {
             background: #1a1a1a;
             border: 1px solid #2a2a2a;
@@ -83,70 +72,18 @@
             align-items: center;
             justify-content: space-between;
             cursor: pointer;
-            transition: 0.2s;
         }
         .card:hover { background: #222; border-color: #f5c542; }
         .card-left { display: flex; align-items: center; gap: 10px; }
         .card-icon { font-size: 28px; }
         .card-info h3 { font-size: 15px; }
         .card-price { font-size: 15px; font-weight: bold; color: #4caf50; }
-        .custom-input {
-            display: flex;
-            gap: 8px;
-            margin-top: 10px;
-        }
-        .custom-input input {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #333;
-            background: #1a1a1a;
-            color: #fff;
-            font-size: 14px;
-        }
-        .custom-input button {
-            background: #f5c542;
-            color: #000;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .btn {
-            background: #f5c542;
-            color: #000;
-            border: none;
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            width: 100%;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #f5c542;
-            color: #f5c542;
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            width: 100%;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #333;
-            background: #1a1a1a;
-            color: #fff;
-            font-size: 14px;
-            margin-top: 8px;
-        }
+        .custom-input { display: flex; gap: 8px; margin-top: 10px; }
+        .custom-input input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 14px; }
+        .custom-input button { background: #f5c542; color: #000; border: none; padding: 12px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn { background: #f5c542; color: #000; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
+        .btn-outline { background: transparent; border: 1px solid #f5c542; color: #f5c542; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
+        .input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: #fff; font-size: 14px; margin-top: 8px; }
         .modal {
             display: none;
             position: fixed;
@@ -179,47 +116,13 @@
             margin-top: 10px;
         }
         .recipient-box.show { display: flex; }
-        .recipient-box img {
-            width: 48px; height: 48px;
-            border-radius: 50%;
-            background: #333;
-            object-fit: cover;
-        }
+        .recipient-box img { width: 48px; height: 48px; border-radius: 50%; background: #333; object-fit: cover; }
         .recipient-box .info .name { font-size: 15px; font-weight: bold; color: #fff; }
         .recipient-box .info .sub { font-size: 12px; color: #888; }
         .recipient-box .status { margin-left: auto; font-size: 22px; }
-        .error-text {
-            color: #ff4444;
-            font-size: 13px;
-            margin-top: 8px;
-            display: none;
-        }
+        .error-text { color: #ff4444; font-size: 13px; margin-top: 8px; display: none; }
         .error-text.show { display: block; }
-        .ton-price {
-            text-align: center;
-            color: #888;
-            font-size: 12px;
-            margin-bottom: 12px;
-        }
-        .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: #1a1a1a;
-            border-top: 1px solid #222;
-            display: flex;
-            justify-content: space-around;
-            padding: 8px 0;
-            z-index: 50;
-        }
-        .bottom-nav .nav-item {
-            text-align: center;
-            font-size: 11px;
-            color: #888;
-            cursor: pointer;
-            padding: 4px 12px;
-        }
-        .bottom-nav .nav-item.active { color: #f5c542; }
-        .bottom-nav .nav-item .nav-icon { font-size: 22px; display: block; }
+        #ton-connect-container { display: flex; justify-content: center; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -229,22 +132,20 @@
         <span class="balance-badge" id="balanceDisplay" onclick="openDeposit()">🪙 0 GRAM</span>
     </div>
 
-    <div class="tabs" id="tabs">
+    <div class="tabs">
         <div class="tab active" data-tab="stars">⭐ Звёзды</div>
         <div class="tab" data-tab="premium">👑 Premium</div>
     </div>
 
-    <!-- Вкладка Звёзды -->
     <div class="section active" id="tab-stars">
-        <div class="section-title">💎 Telegram Stars</div>
+        <div class="section-title">💎 Telegram Stars (от 50 до 100 000 000)</div>
         <div id="stars-list">Загрузка...</div>
         <div class="custom-input">
-            <input type="number" id="customStarsQty" placeholder="Своё количество звёзд" min="1" max="10000000">
+            <input type="number" id="customStarsQty" placeholder="Своё количество (50-100M)" min="50" max="100000000">
             <button onclick="buyCustomStars()">Купить</button>
         </div>
     </div>
 
-    <!-- Вкладка Premium -->
     <div class="section" id="tab-premium">
         <div class="section-title">👑 Telegram Premium</div>
         <div id="premium-list">Загрузка...</div>
@@ -265,7 +166,9 @@
                 <span class="status" id="recipientStatus"></span>
             </div>
             <div class="error-text" id="errorText">⚠️ Пользователь не найден в Telegram</div>
-            <button class="btn" onclick="confirmBuy()">Купить сейчас</button>
+            <div class="error-text" id="insufficientText" style="display:none;"></div>
+            <button class="btn" id="btnBuy" onclick="confirmBuy()">Купить сейчас</button>
+            <button class="btn-outline" id="btnDepositNeeded" onclick="openDeposit()" style="display:none;">💰 Пополнить баланс</button>
             <button class="btn-outline" onclick="closeModal('modalBuy')">Отмена</button>
         </div>
     </div>
@@ -277,15 +180,16 @@
             <p style="color:#aaa;">Введите сумму в GRAM</p>
             <input class="input" type="number" id="depositAmount" placeholder="Например: 10" min="0.1" step="0.1">
             <p style="color:#888;font-size:12px;margin-top:4px;">Минимум: 0.1 GRAM</p>
-            <button class="btn" onclick="deposit()">💳 Пополнить через Tonkeeper</button>
+            <div id="ton-connect-container"></div>
+            <button class="btn" id="btnDeposit" onclick="deposit()">💳 Оплатить</button>
             <button class="btn-outline" onclick="closeModal('modalDeposit')">Отмена</button>
         </div>
     </div>
 
-    <!-- Модалка успешной покупки -->
+    <!-- Модалка успеха -->
     <div class="modal" id="modalSuccess">
         <div class="modal-content" style="text-align:center;">
-            <h3>✅ Готово!</h3>
+            <h3 id="successTitle">✅ Готово!</h3>
             <p id="successText"></p>
             <button class="btn" onclick="closeModal('modalSuccess')">ОК</button>
         </div>
@@ -300,8 +204,14 @@
         let tonPrice = 3.5;
         let userBalance = 0;
         let searchTimeout = null;
-        const USER_ID = tg.initDataUnsafe?.user?.id || 0;
+        let depositAmount = 0;
         const WALLET_ADDRESS = "UQBoaCWXtSkgoygDPUns7vHUZFOuwDRzdZ5upaGXsavWzHc9";
+
+        // TON Connect
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://alan7ipp.github.io/StarGram/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect-container'
+        });
 
         const PRICES_USDT = {
             stars: { 50: 0.75, 100: 1.50, 250: 3.75, 500: 7.50, 750: 11.25, 1000: 15.00, 2500: 37.50, 5000: 75.00, 10000: 150.00, 50000: 750.00, 100000: 1500.00, 1000000: 15000.00 },
@@ -316,9 +226,6 @@
                 tonPrice = (await resp.json())['the-open-network'].usd;
             } catch(e) {}
 
-            document.getElementById('ton-price-display') && (document.getElementById('ton-price-display').textContent = '1 TON = $' + tonPrice.toFixed(2));
-
-            // Premium
             let premiumHTML = '';
             for (const [months, usdt] of Object.entries(PRICES_USDT.premium)) {
                 const gram = usdtToGram(usdt);
@@ -327,12 +234,9 @@
             }
             document.getElementById('premium-list').innerHTML = premiumHTML;
 
-            // Звёзды
             let starsHTML = '';
-            const starQtys = [50, 100, 250, 500, 750, 1000, 2500, 5000, 10000, 50000, 100000, 1000000];
-            starQtys.forEach(qty => {
-                const usdt = PRICES_USDT.stars[qty];
-                const gram = usdtToGram(usdt);
+            [50, 100, 250, 500, 750, 1000, 2500, 5000, 10000, 50000, 100000, 1000000].forEach(qty => {
+                const gram = usdtToGram(PRICES_USDT.stars[qty]);
                 starsHTML += `<div class="card" onclick="openBuy('stars','${qty.toLocaleString()} звёзд',${gram},${qty})"><div class="card-left"><span class="card-icon">⭐</span><div class="card-info"><h3>${qty.toLocaleString()} звёзд</h3></div></div><span class="card-price">${gram} GRAM</span></div>`;
             });
             document.getElementById('stars-list').innerHTML = starsHTML;
@@ -350,7 +254,6 @@
             });
         });
 
-        // Поиск получателя
         function searchRecipient() {
             const input = document.getElementById('recipientInput').value.trim();
             const box = document.getElementById('recipientBox');
@@ -394,10 +297,22 @@
         function openBuy(type, name, price, quantity) {
             currentItem = { type, name, price, quantity };
             document.getElementById('modalTitle').textContent = '🛒 ' + name;
+            const priceNum = parseFloat(price);
             document.getElementById('modalPrice').textContent = 'Цена: ' + price + ' GRAM | Баланс: ' + userBalance.toFixed(1) + ' GRAM';
             document.getElementById('recipientInput').value = '';
             document.getElementById('recipientBox').classList.remove('show');
             document.getElementById('errorText').classList.remove('show');
+            document.getElementById('insufficientText').style.display = 'none';
+            document.getElementById('btnDepositNeeded').style.display = 'none';
+            document.getElementById('btnBuy').style.display = 'block';
+            
+            if (userBalance < priceNum) {
+                const needed = (priceNum - userBalance).toFixed(1);
+                document.getElementById('insufficientText').textContent = '⚠️ Не хватает ' + needed + ' GRAM';
+                document.getElementById('insufficientText').style.display = 'block';
+                document.getElementById('btnDepositNeeded').style.display = 'block';
+            }
+            
             foundRecipient = null;
             document.getElementById('modalBuy').classList.add('active');
             setTimeout(() => document.getElementById('recipientInput').focus(), 300);
@@ -405,38 +320,31 @@
 
         function buyCustomStars() {
             const qty = parseInt(document.getElementById('customStarsQty').value);
-            if (!qty || qty < 1) { tg.showAlert('Введите количество!'); return; }
-            const usdtPerStar = 0.015;
-            const usdt = qty * usdtPerStar;
+            if (!qty || qty < 50) { tg.showAlert('Минимум 50 звёзд!'); return; }
+            if (qty > 100000000) { tg.showAlert('Максимум 100 000 000 звёзд!'); return; }
+            const usdt = qty * 0.015;
             const gram = usdtToGram(usdt);
             openBuy('stars', qty.toLocaleString() + ' звёзд', gram, qty);
         }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-            currentItem = null; foundRecipient = null;
-        }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
         function confirmBuy() {
             const recipient = document.getElementById('recipientInput').value.trim();
             if (!recipient) { tg.showAlert('Введите username!'); return; }
             if (!currentItem) return;
             const price = parseFloat(currentItem.price);
+            
             if (userBalance >= price) {
                 userBalance -= price;
                 updateBalanceDisplay();
                 tg.sendData(JSON.stringify({ action: 'order', type: currentItem.type, name: currentItem.name, price: currentItem.price, quantity: currentItem.quantity, recipient: recipient, paid_from_balance: true }));
-                document.getElementById('modalBuy').classList.remove('active');
-                document.getElementById('successText').textContent = '🛍 ' + currentItem.name + '\n📩 ' + recipient + '\n💰 С баланса списано: ' + price + ' GRAM';
+                closeModal('modalBuy');
+                document.getElementById('successTitle').textContent = '✅ Покупка совершена!';
+                document.getElementById('successText').textContent = '🛍 ' + currentItem.name + '\n📩 ' + recipient + '\n💰 С баланса: -' + price + ' GRAM';
                 document.getElementById('modalSuccess').classList.add('active');
             } else {
-                // Оплата через Tonkeeper
-                const nanoAmount = Math.floor(price * 1_000_000_000);
-                const comment = 'StarGram-' + Date.now().toString(36);
-                tg.sendData(JSON.stringify({ action: 'order', type: currentItem.type, name: currentItem.name, price: currentItem.price, quantity: currentItem.quantity, recipient: recipient, comment: comment }));
-                document.getElementById('modalBuy').classList.remove('active');
-                window.location.href = 'ton://transfer/' + WALLET_ADDRESS + '?amount=' + nanoAmount + '&text=' + comment;
-                setTimeout(() => tg.close(), 1000);
+                openDeposit();
             }
         }
 
@@ -445,23 +353,45 @@
             document.getElementById('modalDeposit').classList.add('active');
         }
 
-        function deposit() {
+        async function deposit() {
             const amount = parseFloat(document.getElementById('depositAmount').value);
             if (!amount || amount < 0.1) { tg.showAlert('Минимум 0.1 GRAM!'); return; }
+            
+            const wallet = tonConnectUI.wallet;
+            if (!wallet) {
+                tg.showAlert('Сначала подключите кошелёк! Нажмите кнопку Tonkeeper выше.');
+                return;
+            }
+
             const nanoAmount = Math.floor(amount * 1_000_000_000);
-            const comment = 'Deposit-' + USER_ID + '-' + Date.now().toString(36);
-            tg.sendData(JSON.stringify({ action: 'deposit', amount: amount, comment: comment }));
-            document.getElementById('modalDeposit').classList.remove('active');
-            window.location.href = 'ton://transfer/' + WALLET_ADDRESS + '?amount=' + nanoAmount + '&text=' + comment;
-            setTimeout(() => tg.close(), 1000);
+            const comment = 'Deposit-' + Date.now().toString(36);
+
+            try {
+                await tonConnectUI.sendTransaction({
+                    validUntil: Math.floor(Date.now() / 1000) + 300,
+                    messages: [{
+                        address: WALLET_ADDRESS,
+                        amount: nanoAmount.toString(),
+                        payload: btoa(comment)
+                    }]
+                });
+
+                userBalance += amount;
+                updateBalanceDisplay();
+                tg.sendData(JSON.stringify({ action: 'deposit', amount: amount, comment: comment }));
+                closeModal('modalDeposit');
+                document.getElementById('successTitle').textContent = '✅ Баланс пополнен!';
+                document.getElementById('successText').textContent = '💰 +' + amount + ' GRAM\nБаланс: ' + userBalance.toFixed(1) + ' GRAM';
+                document.getElementById('modalSuccess').classList.add('active');
+            } catch (e) {
+                tg.showAlert('Ошибка: ' + e.message);
+            }
         }
 
         function updateBalanceDisplay() {
             document.getElementById('balanceDisplay').textContent = '🪙 ' + userBalance.toFixed(1) + ' GRAM';
         }
 
-        // Инициализация
-        userBalance = 0;
         updateBalanceDisplay();
     </script>
 </body>
