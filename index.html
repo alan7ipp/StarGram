@@ -180,8 +180,9 @@
             <p style="color:#aaa;">Введите сумму в GRAM</p>
             <input class="input" type="number" id="depositAmount" placeholder="Например: 10" min="0.1" step="0.1">
             <p style="color:#888;font-size:12px;margin-top:4px;">Минимум: 0.1 GRAM</p>
+            <p style="color:#aaa;font-size:13px;margin:8px 0;">Привяжите кошелёк:</p>
             <div id="ton-connect-container"></div>
-            <button class="btn" id="btnDeposit" onclick="deposit()">💳 Оплатить</button>
+            <button class="btn" id="btnDeposit" onclick="deposit()">🪙 Пополнить</button>
             <button class="btn-outline" onclick="closeModal('modalDeposit')">Отмена</button>
         </div>
     </div>
@@ -204,18 +205,20 @@
         let tonPrice = 3.5;
         let userBalance = 0;
         let searchTimeout = null;
-        let depositAmount = 0;
         const WALLET_ADDRESS = "UQBoaCWXtSkgoygDPUns7vHUZFOuwDRzdZ5upaGXsavWzHc9";
 
-        // TON Connect
+        // TON Connect с аватаркой StarGram
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://alan7ipp.github.io/StarGram/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect-container'
+            buttonRootId: 'ton-connect-container',
+            uiPreferences: {
+                theme: 'DARK'
+            }
         });
 
         const PRICES_USDT = {
             stars: { 50: 0.75, 100: 1.50, 250: 3.75, 500: 7.50, 750: 11.25, 1000: 15.00, 2500: 37.50, 5000: 75.00, 10000: 150.00, 50000: 750.00, 100000: 1500.00, 1000000: 15000.00 },
-            premium: { 1: 11.99, 3: 11.99, 6: 15.99, 12: 28.99 }
+            premium: { 3: 11.99, 6: 15.99, 12: 28.99 }
         };
 
         function usdtToGram(usdt) { return (usdt / tonPrice * 1.02).toFixed(2); }
@@ -229,7 +232,7 @@
             let premiumHTML = '';
             for (const [months, usdt] of Object.entries(PRICES_USDT.premium)) {
                 const gram = usdtToGram(usdt);
-                let label = months == 1 ? '1 месяц' : months == 3 ? '3 месяца' : months == 6 ? '6 месяцев' : '12 месяцев';
+                let label = months == 3 ? '3 месяца' : months == 6 ? '6 месяцев' : '12 месяцев';
                 premiumHTML += `<div class="card" onclick="openBuy('premium','Premium на ${label}',${gram},${months})"><div class="card-left"><span class="card-icon">👑</span><div class="card-info"><h3>Premium на ${label}</h3></div></div><span class="card-price">${gram} GRAM</span></div>`;
             }
             document.getElementById('premium-list').innerHTML = premiumHTML;
@@ -244,7 +247,6 @@
 
         loadPrices();
 
-        // Табы
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', function() {
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -359,32 +361,30 @@
             
             const wallet = tonConnectUI.wallet;
             if (!wallet) {
-                tg.showAlert('Сначала подключите кошелёк! Нажмите кнопку Tonkeeper выше.');
+                tg.showAlert('Сначала привяжите кошелёк! Нажмите кнопку Tonkeeper выше.');
                 return;
             }
 
             const nanoAmount = Math.floor(amount * 1_000_000_000);
-            const comment = 'Deposit-' + Date.now().toString(36);
 
             try {
                 await tonConnectUI.sendTransaction({
                     validUntil: Math.floor(Date.now() / 1000) + 300,
                     messages: [{
                         address: WALLET_ADDRESS,
-                        amount: nanoAmount.toString(),
-                        payload: btoa(comment)
+                        amount: nanoAmount.toString()
                     }]
                 });
 
                 userBalance += amount;
                 updateBalanceDisplay();
-                tg.sendData(JSON.stringify({ action: 'deposit', amount: amount, comment: comment }));
+                tg.sendData(JSON.stringify({ action: 'deposit', amount: amount }));
                 closeModal('modalDeposit');
                 document.getElementById('successTitle').textContent = '✅ Баланс пополнен!';
                 document.getElementById('successText').textContent = '💰 +' + amount + ' GRAM\nБаланс: ' + userBalance.toFixed(1) + ' GRAM';
                 document.getElementById('modalSuccess').classList.add('active');
             } catch (e) {
-                tg.showAlert('Ошибка: ' + e.message);
+                tg.showAlert('Ошибка: ' + (e.message || 'Попробуйте снова'));
             }
         }
 
