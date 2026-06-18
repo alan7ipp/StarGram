@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarGram Market</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            padding: 16px;
+        }
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #222;
+            margin-bottom: 20px;
+        }
+        .header h1 { font-size: 24px; color: #f5c542; }
+        .header p { color: #888; font-size: 14px; margin-top: 4px; }
+        .section { margin-bottom: 20px; }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #f5c542;
+        }
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .card:hover { background: #222; border-color: #f5c542; }
+        .card-left { display: flex; align-items: center; gap: 12px; }
+        .card-icon { font-size: 32px; }
+        .card-info h3 { font-size: 16px; }
+        .card-info p { font-size: 12px; color: #888; }
+        .card-price {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4caf50;
+        }
+        .btn {
+            background: #f5c542;
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:disabled { background: #444; color: #888; cursor: not-allowed; }
+        .input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 20px;
+            width: 90%;
+            max-width: 360px;
+        }
+        .modal-content h3 { margin-bottom: 12px; color: #f5c542; }
+        .modal-content p { color: #aaa; font-size: 14px; margin-bottom: 6px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⭐ StarGram Market</h1>
+        <p>Звёзды, Premium, подарки — без верификации</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">💎 Telegram Stars</div>
+        <div class="card" onclick="openBuy('stars', '50 звёзд', 125, 50)">
+            <div class="card-left">
+                <span class="card-icon">⭐</span>
+                <div class="card-info"><h3>50 звёзд</h3><p>Моментальная доставка</p></div>
+            </div>
+            <span class="card-price">125 TON</span>
+        </div>
+        <div class="card" onclick="openBuy('stars', '100 звёзд', 250, 100)">
+            <div class="card-left">
+                <span class="card-icon">⭐</span>
+                <div class="card-info"><h3>100 звёзд</h3><p>Моментальная доставка</p></div>
+            </div>
+            <span class="card-price">250 TON</span>
+        </div>
+        <div class="card" onclick="openBuy('stars', '500 звёзд', 1250, 500)">
+            <div class="card-left">
+                <span class="card-icon">⭐</span>
+                <div class="card-info"><h3>500 звёзд</h3><p>Моментальная доставка</p></div>
+            </div>
+            <span class="card-price">1 250 TON</span>
+        </div>
+        <div class="card" onclick="openBuy('stars', '1000 звёзд', 2500, 1000)">
+            <div class="card-left">
+                <span class="card-icon">⭐</span>
+                <div class="card-info"><h3>1000 звёзд</h3><p>Моментальная доставка</p></div>
+            </div>
+            <span class="card-price">2 500 TON</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">👑 Telegram Premium</div>
+        <div class="card" onclick="openBuy('premium', 'Premium 3 мес.', 8.5, 3)">
+            <div class="card-left">
+                <span class="card-icon">👑</span>
+                <div class="card-info"><h3>Premium 3 месяца</h3><p>Без верификации</p></div>
+            </div>
+            <span class="card-price">8.5 TON</span>
+        </div>
+        <div class="card" onclick="openBuy('premium', 'Premium 6 мес.', 17, 6)">
+            <div class="card-left">
+                <span class="card-icon">👑</span>
+                <div class="card-info"><h3>Premium 6 месяцев</h3><p>Без верификации</p></div>
+            </div>
+            <span class="card-price">17 TON</span>
+        </div>
+        <div class="card" onclick="openBuy('premium', 'Premium 12 мес.', 33, 12)">
+            <div class="card-left">
+                <span class="card-icon">👑</span>
+                <div class="card-info"><h3>Premium 12 месяцев</h3><p>Без верификации</p></div>
+            </div>
+            <span class="card-price">33 TON</span>
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Покупка</h3>
+            <p id="modalDesc"></p>
+            <p id="modalPrice"></p>
+            <input class="input" type="text" id="recipientInput" placeholder="Username получателя (@username)">
+            <button class="btn" id="buyBtn" onclick="confirmBuy()">Подтвердить покупку</button>
+            <button class="btn" style="background:#444;color:#fff;margin-top:6px" onclick="closeModal()">Отмена</button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let currentItem = null;
+
+        function openBuy(type, name, price, quantity) {
+            currentItem = { type, name, price, quantity };
+            document.getElementById('modalTitle').textContent = '🛒 ' + name;
+            document.getElementById('modalDesc').textContent = 'Цена: ' + price + ' TON';
+            document.getElementById('modalPrice').textContent = 'Введите username получателя:';
+            document.getElementById('recipientInput').value = '';
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            currentItem = null;
+        }
+
+        function confirmBuy() {
+            const recipient = document.getElementById('recipientInput').value.trim();
+            if (!recipient) {
+                alert('Введите username получателя!');
+                return;
+            }
+            if (!currentItem) return;
+
+            const data = {
+                type: currentItem.type,
+                name: currentItem.name,
+                price: currentItem.price,
+                quantity: currentItem.quantity,
+                recipient: recipient
+            };
+
+            tg.sendData(JSON.stringify(data));
+            tg.close();
+        }
+    </script>
+</body>
+</html>
