@@ -23,33 +23,52 @@ logging.basicConfig(level=logging.INFO)
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# === БАЗА ДАННЫХ ===
 conn = sqlite3.connect("database.db", check_same_thread=False)
 cursor = conn.cursor()
 
 def init_db():
-    cursor.execute("CREATE TABLE IF NOT EXISTS users (tg_id INTEGER PRIMARY KEY, username TEXT, balance REAL DEFAULT 0, total_spent REAL DEFAULT 0, created_at REAL DEFAULT 0)")
-    cursor.execute("CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, tg_id INTEGER, order_type TEXT, item_name TEXT, quantity INTEGER, recipient TEXT, amount REAL, status TEXT DEFAULT 'pending', created_at REAL DEFAULT 0)")
-    cursor.execute("CREATE TABLE IF NOT EXISTS deposits (id TEXT PRIMARY KEY, tg_id INTEGER, amount REAL, status TEXT DEFAULT 'pending', created_at REAL DEFAULT 0)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS users (tg_id INTEGER PRIMARY KEY, username TEXT, balance REAL DEFAULT 0, total_spent REAL DEFAULT 0, banned INTEGER DEFAULT 0, ban_reason TEXT DEFAULT '', ban_until REAL DEFAULT 0, created_at REAL DEFAULT 0)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, tg_id INTEGER, order_type TEXT, item_name TEXT, quantity INTEGER, recipient TEXT, amount REAL, status TEXT DEFAULT 'pending', tx_hash TEXT DEFAULT '', created_at REAL DEFAULT 0)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS deposits (id TEXT PRIMARY KEY, tg_id INTEGER, amount REAL, status TEXT DEFAULT 'pending', tx_hash TEXT DEFAULT '', created_at REAL DEFAULT 0)")
     conn.commit()
 
 init_db()
 
 def get_user(tg_id: int): cursor.execute("SELECT * FROM users WHERE tg_id = ?", (tg_id,)); return cursor.fetchone()
-def create_user(tg_id: int, username: str): cursor.execute("INSERT OR IGNORE INTO users (tg_id, username, balance, total_spent, created_at) VALUES (?, ?, 0, 0, ?)", (tg_id, username, time.time())); conn.commit()
+def create_user(tg_id: int, username: str): cursor.execute("INSERT OR IGNORE INTO users (tg_id, username, balance, total_spent, banned, created_at) VALUES (?, ?, 0, 0, 0, ?)", (tg_id, username, time.time())); conn.commit()
 def get_balance(tg_id: int) -> float: user = get_user(tg_id); return user[2] if user else 0
+def is_banned(tg_id: int) -> bool:
+    user = get_user(tg_id)
+    if not user: return False
+    if user[4] == 1:
+        if user[6] > 0 and time.time() > user[6]:
+            cursor.execute("UPDATE users SET banned=0, ban_reason='', ban_until=0 WHERE tg_id=?", (tg_id,)); conn.commit()
+            return False
+        return True
+    return False
+
 def add_balance(tg_id: int, amount: float): cursor.execute("UPDATE users SET balance = balance + ? WHERE tg_id = ?", (amount, tg_id)); conn.commit()
 def subtract_balance(tg_id: int, amount: float) -> bool:
     user = get_user(tg_id)
     if user and user[2] >= amount:
-        cursor.execute("UPDATE users SET balance = balance - ?, total_spent = total_spent + ? WHERE tg_id = ?", (amount, amount, tg_id))
-        conn.commit()
+        cursor.execute("UPDATE users SET balance = balance - ?, total_spent = total_spent + ? WHERE tg_id = ?", (amount, amount, tg_id)); conn.commit()
         return True
     return False
-def create_order(order_id: str, tg_id: int, order_type: str, item_name: str, quantity: int, recipient: str, amount: float):
-    cursor.execute("INSERT INTO orders (id, tg_id, order_type, item_name, quantity, recipient, amount, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?)", (order_id, tg_id, order_type, item_name, quantity, recipient, amount, time.time())); conn.commit()
-def create_deposit(deposit_id: str, tg_id: int, amount: float):
-    cursor.execute("INSERT INTO deposits (id, tg_id, amount, status, created_at) VALUES (?, ?, ?, 'completed', ?)", (deposit_id, tg_id, amount, time.time())); conn.commit()
+
+def ban_user(tg_id: int, reason: str, until: float = 0):
+    cursor.execute("UPDATE users SET banned=1, ban_reason=?, ban_until=? WHERE tg_id=?", (reason, until, tg_id)); conn.commit()
+
+def unban_user(tg_id: int):
+    cursor.execute("UPDATE users SET banned=0, ban_reason='', ban_until=0 WHERE tg_id=?", (tg_id,)); conn.commit()
+
+def create_order(order_id: str, tg_id: int, order_type: str, item_name: str, quantity: int, recipient: str, amount: float, tx_hash: str = ''):
+    cursor.execute("INSERT INTO orders (id, tg_id, order_type, item_name, quantity, recipient, amount, status, tx_hash, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)", (order_id, tg_id, order_type, item_name, quantity, recipient, amount, tx_hash, time.time())); conn.commit()
+
+def create_deposit(deposit_id: str, tg_id: int, amount: float, tx_hash: str = ''):
+    cursor.execute("INSERT INTO deposits (id, tg_id, amount, status, tx_hash, created_at) VALUES (?, ?, ?, 'pending', ?, ?)", (deposit_id, tg_id, amount, tx_hash, time.time())); conn.commit()
+
+def confirm_deposit(deposit_id: str):
+    cursor.execute("UPDATE deposits SET status='completed' WHERE id=?", (deposit_id,)); conn.commit()
 
 PRICES_USDT = {
     "stars": {50: 0.75, 100: 1.50, 250: 3.75, 500: 7.50, 750: 11.25, 1000: 15.00, 2500: 37.50, 5000: 75.00, 10000: 150.00, 50000: 750.00, 100000: 1500.00, 1000000: 15000.00},
@@ -144,10 +163,7 @@ def format_text(text: str) -> str:
 @dp.message(Command("start"))
 async def send_welcome(message: types.Message):
     create_user(message.from_user.id, message.from_user.username or message.from_user.full_name)
-    text = format_text(
-        "⭐ Добро пожаловать в StarGram — маркетплейс Telegram-активов.\n\n"
-        "💎 Звёзды, Premium, юзернеймы, подарки, крипта и многое другое — без верификации по самым низким ценам."
-    )
+    text = format_text("⭐ Добро пожаловать в StarGram — маркетплейс Telegram-активов.\n\n💎 Звёзды, Premium, юзернеймы, подарки, крипта и многое другое — без верификации по самым низким ценам.")
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Перейти в StarGram", web_app=WebAppInfo(url="https://alan7ipp.github.io/StarGram/"), icon_custom_emoji_id="5283080528818360566")],
         [InlineKeyboardButton(text="Сообщество StarGram", url="https://t.me/StarGramX", icon_custom_emoji_id="5278256077954105203")],
@@ -159,22 +175,69 @@ async def send_welcome(message: types.Message):
 @dp.message(Command("admin"))
 async def admin_panel(message: types.Message):
     if message.from_user.id in ADMIN_IDS:
-        await message.answer(format_text(f"👑 Админ-панель\n\n👤 ID: {message.from_user.id}\n✅ Статус: Активен"), parse_mode=ParseMode.HTML)
+        await message.answer(format_text(f"👑 Админ-панель\n\n👤 ID: {message.from_user.id}\n✅ Статус: Активен\n\nКоманды:\n/ban ID причина\n/unban ID\n/give ID сумма\n/take ID сумма\n/userinfo ID"), parse_mode=ParseMode.HTML)
     else:
         await message.answer(format_text("❌ Нет доступа"), parse_mode=ParseMode.HTML)
 
 
-@dp.message(Command("prices"))
-async def show_prices(message: types.Message):
-    ton_price = await get_ton_price()
-    text = f"💎 Актуальные цены\n\n🪙 1 TON = ${ton_price:.2f}\n\n⭐ Звёзды:\n"
-    for qty, usdt in PRICES_USDT["stars"].items():
-        text += f"{qty} звёзд — {usdt_to_gram(usdt, ton_price)} GRAM\n"
-    text += "\n👑 Premium:\n"
-    for months, usdt in PRICES_USDT["premium"].items():
-        text += f"{months} мес. — {usdt_to_gram(usdt, ton_price)} GRAM\n"
-    text += "\n💰 Наценка: +2%"
-    await message.answer(format_text(text), parse_mode=ParseMode.HTML)
+@dp.message(Command("userinfo"))
+async def user_info(message: types.Message):
+    if message.from_user.id not in ADMIN_IDS: return
+    args = message.text.split()
+    if len(args) < 2: await message.answer("Используйте: /userinfo ID"); return
+    uid = int(args[1]) if args[1].isdigit() else None
+    if not uid: await message.answer("Неверный ID"); return
+    user = get_user(uid)
+    if not user: await message.answer("Пользователь не найден"); return
+    await message.answer(format_text(f"👤 ID: {user[0]}\n📛 Username: @{user[1] or 'нет'}\n💰 Баланс: {user[2]} GRAM\n💸 Потрачено: {user[3]} GRAM\n🚫 Бан: {'Да' if user[4] else 'Нет'}\n📝 Причина: {user[5] or 'нет'}"), parse_mode=ParseMode.HTML)
+
+
+@dp.message(Command("ban"))
+async def ban_cmd(message: types.Message):
+    if message.from_user.id not in ADMIN_IDS: return
+    args = message.text.split(maxsplit=3)
+    if len(args) < 3: await message.answer("/ban ID причина [время]"); return
+    uid = int(args[1]) if args[1].isdigit() else None
+    if not uid: await message.answer("Неверный ID"); return
+    reason = args[2] if len(args) > 2 else ''
+    until = float(args[3])*3600 + time.time() if len(args) > 3 else 0
+    ban_user(uid, reason, until)
+    await message.answer(format_text(f"🚫 Пользователь {uid} забанен\n📝 {reason}"))
+
+
+@dp.message(Command("unban"))
+async def unban_cmd(message: types.Message):
+    if message.from_user.id not in ADMIN_IDS: return
+    args = message.text.split()
+    if len(args) < 2: await message.answer("/unban ID"); return
+    uid = int(args[1]) if args[1].isdigit() else None
+    if not uid: await message.answer("Неверный ID"); return
+    unban_user(uid)
+    await message.answer(format_text(f"✅ Пользователь {uid} разбанен"))
+
+
+@dp.message(Command("give"))
+async def give_cmd(message: types.Message):
+    if message.from_user.id not in ADMIN_IDS: return
+    args = message.text.split()
+    if len(args) < 3: await message.answer("/give ID сумма"); return
+    uid = int(args[1]) if args[1].isdigit() else None
+    if not uid: await message.answer("Неверный ID"); return
+    amt = float(args[2])
+    add_balance(uid, amt)
+    await message.answer(format_text(f"💰 +{amt} GRAM пользователю {uid}"))
+
+
+@dp.message(Command("take"))
+async def take_cmd(message: types.Message):
+    if message.from_user.id not in ADMIN_IDS: return
+    args = message.text.split()
+    if len(args) < 3: await message.answer("/take ID сумма"); return
+    uid = int(args[1]) if args[1].isdigit() else None
+    if not uid: await message.answer("Неверный ID"); return
+    amt = float(args[2])
+    subtract_balance(uid, amt)
+    await message.answer(format_text(f"💸 -{amt} GRAM у пользователя {uid}"))
 
 
 @dp.message(F.content_type == "web_app_data")
@@ -184,114 +247,82 @@ async def handle_webapp(message: types.Message):
     buyer = message.from_user
     create_user(buyer.id, buyer.username or buyer.full_name)
 
+    if is_banned(buyer.id):
+        await message.answer(format_text("🚫 Вы заблокированы в системе."), parse_mode=ParseMode.HTML)
+        return
+
     if action == "get_balance":
-        bal = get_balance(buyer.id)
-        await message.answer(format_text(f"💰 Ваш баланс: {bal} GRAM"), parse_mode=ParseMode.HTML)
+        await message.answer(format_text(f"💰 Ваш баланс: {get_balance(buyer.id)} GRAM"), parse_mode=ParseMode.HTML)
         return
 
     if action == "deposit":
-        amount = float(data.get("amount"))
+        amount = float(data.get("amount", 0))
+        tx_hash = data.get("tx_hash", "")
+        if amount < 0.1:
+            await message.answer(format_text("❌ Минимум 0.1 GRAM"), parse_mode=ParseMode.HTML)
+            return
         dep_id = hashlib.md5(f"{buyer.id}{time.time()}".encode()).hexdigest()[:8]
-        create_deposit(dep_id, buyer.id, amount)
+        create_deposit(dep_id, buyer.id, amount, tx_hash)
         add_balance(buyer.id, amount)
-        await message.answer(
-            format_text(f"✅ Баланс пополнен на {amount} GRAM\n\n💰 Текущий баланс: {get_balance(buyer.id)} GRAM"),
-            parse_mode=ParseMode.HTML
-        )
+        confirm_deposit(dep_id)
+        await message.answer(format_text(f"✅ Баланс пополнен на {amount} GRAM\n💰 Баланс: {get_balance(buyer.id)} GRAM"), parse_mode=ParseMode.HTML)
         for admin_id in ADMIN_IDS:
-            try:
-                await bot.send_message(admin_id,
-                    format_text(f"💰 Пополнение!\n\n👤 @{buyer.username or buyer.full_name} (ID: {buyer.id})\n💎 +{amount} GRAM\n\n💰 Баланс: {get_balance(buyer.id)} GRAM"),
-                    parse_mode=ParseMode.HTML)
+            try: await bot.send_message(admin_id, format_text(f"💰 Пополнение!\n👤 @{buyer.username or buyer.full_name}\n+{amount} GRAM\nБаланс: {get_balance(buyer.id)} GRAM"), parse_mode=ParseMode.HTML)
             except: pass
         return
 
     if action == "order":
         order_type = data.get("type")
-        order_name = data.get("name")
-        order_price = float(data.get("price"))
+        order_price = float(data.get("price", 0))
         order_quantity = data.get("quantity")
         recipient = data.get("recipient")
         paid_from_balance = data.get("paid_from_balance", False)
-
-        if order_type == "premium":
-            item_icon = "👑"
-            item_text = f"Premium на {order_quantity} мес."
-        elif order_type == "stars":
-            item_icon = "⭐"
-            item_text = f"{order_quantity} звёзд"
-        else:
-            item_icon = "🎁"
-            item_text = order_name
-
+        item_icon = "⭐" if order_type == "stars" else "👑" if order_type == "premium" else "🎁"
+        item_text = f"{order_quantity} звёзд" if order_type == "stars" else f"Premium на {order_quantity} мес." if order_type == "premium" else data.get("name")
         order_id = hashlib.md5(f"{buyer.id}{time.time()}".encode()).hexdigest()[:8]
 
         if paid_from_balance:
             if subtract_balance(buyer.id, order_price):
                 create_order(order_id, buyer.id, order_type, item_text, order_quantity, recipient, order_price)
-                # Уведомление покупателю
-                await message.answer(
-                    format_text(
-                        f"✅ Заказ #{order_id} оформлен!\n\n"
-                        f"🛍 Товар: {item_icon} {item_text}\n"
-                        f"📩 Получатель: {recipient}\n"
-                        f"💰 Списано с баланса: {order_price} GRAM\n"
-                        f"💎 Остаток: {get_balance(buyer.id)} GRAM\n\n"
-                        f"⏳ Ожидайте — мы отправим товар в ближайшее время."
-                    ),
-                    parse_mode=ParseMode.HTML
-                )
-                # Уведомление админам
+                await message.answer(format_text(f"✅ Заказ #{order_id}\n🛍 {item_icon} {item_text}\n📩 {recipient}\n💰 -{order_price} GRAM\nОстаток: {get_balance(buyer.id)} GRAM\n⏳ Ожидайте отправки!"), parse_mode=ParseMode.HTML)
                 for admin_id in ADMIN_IDS:
-                    try:
-                        await bot.send_message(admin_id,
-                            format_text(
-                                f"🔔 Новый заказ #{order_id}!\n\n"
-                                f"👤 Покупатель: @{buyer.username or buyer.full_name} (ID: {buyer.id})\n"
-                                f"🛍 Товар: {item_icon} {item_text}\n"
-                                f"📩 Получатель: {recipient}\n"
-                                f"💰 Сумма: {order_price} GRAM (с баланса)\n\n"
-                                f"⚡ Зайди на Fragment и отправь товар!"
-                            ),
-                            parse_mode=ParseMode.HTML)
+                    try: await bot.send_message(admin_id, format_text(f"🔔 Заказ #{order_id}!\n👤 @{buyer.username or buyer.full_name}\n🛍 {item_icon} {item_text}\n📩 {recipient}\n💰 {order_price} GRAM (с баланса)\n⚡ Отправь товар!"), parse_mode=ParseMode.HTML)
                     except: pass
             else:
-                await message.answer(format_text("❌ Недостаточно средств на балансе"), parse_mode=ParseMode.HTML)
+                await message.answer(format_text("❌ Недостаточно средств"), parse_mode=ParseMode.HTML)
         else:
             create_order(order_id, buyer.id, order_type, item_text, order_quantity, recipient, order_price)
-            nano_amount = int(order_price * 1_000_000_000)
-            ton_link = f"ton://transfer/{WALLET_ADDRESS}?amount={nano_amount}&text=StarGram-{order_id}"
-            await message.answer(
-                format_text(
-                    f"🛒 Заказ #{order_id}\n\n"
-                    f"🛍 Товар: {item_icon} {item_text}\n"
-                    f"📩 Получатель: {recipient}\n"
-                    f"💰 Сумма к оплате: {order_price} GRAM\n\n"
-                    f"👇 Нажмите кнопку для оплаты через Tonkeeper"
-                ),
-                reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                    [InlineKeyboardButton(text="💳 Оплатить через Tonkeeper", url=ton_link)]
-                ]),
-                parse_mode=ParseMode.HTML
-            )
+            nano = int(order_price * 1e9)
+            link = f"ton://transfer/{WALLET_ADDRESS}?amount={nano}&text=StarGram-{order_id}"
+            await message.answer(format_text(f"🛒 Заказ #{order_id}\n🛍 {item_icon} {item_text}\n📩 {recipient}\n💰 {order_price} GRAM\n👇 Оплатите:"), reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="💳 Оплатить", url=link)]]), parse_mode=ParseMode.HTML)
             for admin_id in ADMIN_IDS:
-                try:
-                    await bot.send_message(admin_id,
-                        format_text(
-                            f"🔔 Новый заказ #{order_id}!\n\n"
-                            f"👤 @{buyer.username or buyer.full_name} (ID: {buyer.id})\n"
-                            f"🛍 {item_icon} {item_text}\n"
-                            f"📩 {recipient}\n"
-                            f"💰 {order_price} GRAM\n\n"
-                            f"⏳ Ожидает оплаты..."
-                        ),
-                        parse_mode=ParseMode.HTML)
+                try: await bot.send_message(admin_id, format_text(f"🔔 Заказ #{order_id}\n👤 @{buyer.username or buyer.full_name}\n🛍 {item_icon} {item_text}\n📩 {recipient}\n💰 {order_price} GRAM\n⏳ Ждёт оплаты"), parse_mode=ParseMode.HTML)
                 except: pass
+        return
+
+    # Админ-команды из Mini App
+    if action in ["admin_ban","admin_unban","admin_give","admin_take","admin_userinfo"]:
+        if buyer.id not in ADMIN_IDS: return
+        uid = int(data.get("user_id", 0))
+        if action == "admin_userinfo":
+            u = get_user(uid)
+            await message.answer(format_text(f"👤 ID: {uid}\n📛 @{u[1] if u else 'нет'}\n💰 {u[2] if u else 0} GRAM\n🚫 {'Да' if u and u[4] else 'Нет'}"), parse_mode=ParseMode.HTML)
+        elif action == "admin_ban":
+            ban_user(uid, data.get("reason",""), float(data.get("hours",0))*3600+time.time())
+            await message.answer(format_text(f"🚫 {uid} забанен"))
+        elif action == "admin_unban":
+            unban_user(uid)
+            await message.answer(format_text(f"✅ {uid} разбанен"))
+        elif action == "admin_give":
+            add_balance(uid, float(data.get("amount",0)))
+            await message.answer(format_text(f"💰 +{data.get('amount')} GRAM → {uid}"))
+        elif action == "admin_take":
+            subtract_balance(uid, float(data.get("amount",0)))
+            await message.answer(format_text(f"💸 -{data.get('amount')} GRAM ← {uid}"))
 
 
 async def main():
     print("Бот запущен!")
-    print(f"💰 Кошелёк: {WALLET_ADDRESS}")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
