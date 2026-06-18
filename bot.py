@@ -28,51 +28,17 @@ conn = sqlite3.connect("database.db", check_same_thread=False)
 cursor = conn.cursor()
 
 def init_db():
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            tg_id INTEGER PRIMARY KEY,
-            username TEXT,
-            balance REAL DEFAULT 0,
-            total_spent REAL DEFAULT 0,
-            created_at REAL DEFAULT 0
-        )
-    """)
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS orders (
-            id TEXT PRIMARY KEY,
-            tg_id INTEGER,
-            order_type TEXT,
-            item_name TEXT,
-            quantity INTEGER,
-            recipient TEXT,
-            amount REAL,
-            status TEXT DEFAULT 'pending',
-            created_at REAL DEFAULT 0
-        )
-    """)
+    cursor.execute("CREATE TABLE IF NOT EXISTS users (tg_id INTEGER PRIMARY KEY, username TEXT, balance REAL DEFAULT 0, total_spent REAL DEFAULT 0, created_at REAL DEFAULT 0)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, tg_id INTEGER, order_type TEXT, item_name TEXT, quantity INTEGER, recipient TEXT, amount REAL, status TEXT DEFAULT 'pending', created_at REAL DEFAULT 0)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS deposits (id TEXT PRIMARY KEY, tg_id INTEGER, amount REAL, status TEXT DEFAULT 'pending', created_at REAL DEFAULT 0)")
     conn.commit()
 
 init_db()
 
-def get_user(tg_id: int):
-    cursor.execute("SELECT * FROM users WHERE tg_id = ?", (tg_id,))
-    return cursor.fetchone()
-
-def create_user(tg_id: int, username: str):
-    cursor.execute(
-        "INSERT OR IGNORE INTO users (tg_id, username, balance, total_spent, created_at) VALUES (?, ?, 0, 0, ?)",
-        (tg_id, username, time.time())
-    )
-    conn.commit()
-
-def get_balance(tg_id: int) -> float:
-    user = get_user(tg_id)
-    return user[2] if user else 0
-
-def add_balance(tg_id: int, amount: float):
-    cursor.execute("UPDATE users SET balance = balance + ? WHERE tg_id = ?", (amount, tg_id))
-    conn.commit()
-
+def get_user(tg_id: int): cursor.execute("SELECT * FROM users WHERE tg_id = ?", (tg_id,)); return cursor.fetchone()
+def create_user(tg_id: int, username: str): cursor.execute("INSERT OR IGNORE INTO users (tg_id, username, balance, total_spent, created_at) VALUES (?, ?, 0, 0, ?)", (tg_id, username, time.time())); conn.commit()
+def get_balance(tg_id: int) -> float: user = get_user(tg_id); return user[2] if user else 0
+def add_balance(tg_id: int, amount: float): cursor.execute("UPDATE users SET balance = balance + ? WHERE tg_id = ?", (amount, tg_id)); conn.commit()
 def subtract_balance(tg_id: int, amount: float) -> bool:
     user = get_user(tg_id)
     if user and user[2] >= amount:
@@ -80,21 +46,14 @@ def subtract_balance(tg_id: int, amount: float) -> bool:
         conn.commit()
         return True
     return False
-
 def create_order(order_id: str, tg_id: int, order_type: str, item_name: str, quantity: int, recipient: str, amount: float):
-    cursor.execute(
-        "INSERT INTO orders (id, tg_id, order_type, item_name, quantity, recipient, amount, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?)",
-        (order_id, tg_id, order_type, item_name, quantity, recipient, amount, time.time())
-    )
-    conn.commit()
-
-def complete_order(order_id: str):
-    cursor.execute("UPDATE orders SET status = 'completed' WHERE id = ?", (order_id,))
-    conn.commit()
+    cursor.execute("INSERT INTO orders (id, tg_id, order_type, item_name, quantity, recipient, amount, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?)", (order_id, tg_id, order_type, item_name, quantity, recipient, amount, time.time())); conn.commit()
+def create_deposit(deposit_id: str, tg_id: int, amount: float):
+    cursor.execute("INSERT INTO deposits (id, tg_id, amount, status, created_at) VALUES (?, ?, ?, 'completed', ?)", (deposit_id, tg_id, amount, time.time())); conn.commit()
 
 PRICES_USDT = {
     "stars": {50: 0.75, 100: 1.50, 250: 3.75, 500: 7.50, 750: 11.25, 1000: 15.00, 2500: 37.50, 5000: 75.00, 10000: 150.00, 50000: 750.00, 100000: 1500.00, 1000000: 15000.00},
-    "premium": {1: 11.99, 3: 11.99, 6: 15.99, 12: 28.99}
+    "premium": {3: 11.99, 6: 15.99, 12: 28.99}
 }
 
 ton_price_cache = {"price": 0, "updated": 0}
@@ -197,13 +156,6 @@ async def send_welcome(message: types.Message):
     await message.answer(text, reply_markup=keyboard, parse_mode=ParseMode.HTML)
 
 
-@dp.message(Command("balance"))
-async def show_balance(message: types.Message):
-    create_user(message.from_user.id, message.from_user.username or message.from_user.full_name)
-    bal = get_balance(message.from_user.id)
-    await message.answer(format_text(f"💰 Ваш баланс\n\n🪙 {bal} GRAM\n\nДля пополнения нажмите кнопку ниже 👇"), parse_mode=ParseMode.HTML)
-
-
 @dp.message(Command("admin"))
 async def admin_panel(message: types.Message):
     if message.from_user.id in ADMIN_IDS:
@@ -225,12 +177,6 @@ async def show_prices(message: types.Message):
     await message.answer(format_text(text), parse_mode=ParseMode.HTML)
 
 
-@dp.message(Command("course"))
-async def show_course(message: types.Message):
-    ton_price = await get_ton_price()
-    await message.answer(format_text(f"🪙 Курс TON\n\n1 TON = ${ton_price:.2f}"), parse_mode=ParseMode.HTML)
-
-
 @dp.message(F.content_type == "web_app_data")
 async def handle_webapp(message: types.Message):
     data = json.loads(message.web_app_data.data)
@@ -243,9 +189,16 @@ async def handle_webapp(message: types.Message):
         await message.answer(format_text(f"💰 Ваш баланс: {bal} GRAM"), parse_mode=ParseMode.HTML)
         return
 
-    if action == "get_ton_price":
-        ton_price = await get_ton_price()
-        await message.answer(format_text(f"🪙 1 TON = ${ton_price:.2f}"), parse_mode=ParseMode.HTML)
+    if action == "deposit":
+        amount = float(data.get("amount"))
+        dep_id = hashlib.md5(f"{buyer.id}{time.time()}".encode()).hexdigest()[:8]
+        create_deposit(dep_id, buyer.id, amount)
+        add_balance(buyer.id, amount)
+        await message.answer(format_text(f"✅ Баланс пополнен на {amount} GRAM\n\n💰 Текущий баланс: {get_balance(buyer.id)} GRAM"), parse_mode=ParseMode.HTML)
+        for admin_id in ADMIN_IDS:
+            try:
+                await bot.send_message(admin_id, format_text(f"💰 Пополнение!\n👤 @{buyer.username or buyer.full_name} (ID: {buyer.id})\n💎 +{amount} GRAM\nБаланс: {get_balance(buyer.id)} GRAM"), parse_mode=ParseMode.HTML)
+            except: pass
         return
 
     if action == "order":
@@ -254,6 +207,7 @@ async def handle_webapp(message: types.Message):
         order_price = float(data.get("price"))
         order_quantity = data.get("quantity")
         recipient = data.get("recipient")
+        paid_from_balance = data.get("paid_from_balance", False)
 
         if order_type == "premium":
             item_icon = "👑"
@@ -266,66 +220,30 @@ async def handle_webapp(message: types.Message):
             item_text = order_name
 
         order_id = hashlib.md5(f"{buyer.id}{time.time()}".encode()).hexdigest()[:8]
-        nano_amount = int(order_price * 1_000_000_000)
-        ton_link = f"ton://transfer/{WALLET_ADDRESS}?amount={nano_amount}&text=StarGram-{order_id}"
 
-        create_order(order_id, buyer.id, order_type, item_text, order_quantity, recipient, order_price)
-
-        pay_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="💳 Оплатить через Tonkeeper", url=ton_link)],
-            [InlineKeyboardButton(text="✅ Я оплатил", callback_data=f"check_{order_id}")]
-        ])
-
-        await message.answer(
-            format_text(
-                f"🛒 Заказ #{order_id}\n\n"
-                f"🛍 Товар: {item_icon} {item_text}\n"
-                f"📩 Получатель: {recipient}\n"
-                f"💰 Сумма: {order_price} GRAM\n\n"
-                f"👇 Оплатите и нажмите «Я оплатил»"
-            ),
-            reply_markup=pay_keyboard,
-            parse_mode=ParseMode.HTML
-        )
-
-        admin_text = format_text(
-            f"🔔 Новый заказ #{order_id}!\n\n"
-            f"👤 @{buyer.username or buyer.full_name} (ID: {buyer.id})\n"
-            f"🛍 {item_icon} {item_text}\n"
-            f"📩 {recipient}\n"
-            f"💰 {order_price} GRAM\n⏳ Ожидает оплаты..."
-        )
-        for admin_id in ADMIN_IDS:
-            try:
-                await bot.send_message(admin_id, admin_text, parse_mode=ParseMode.HTML)
-            except:
-                pass
-
-
-@dp.callback_query(F.data.startswith("check_"))
-async def check_payment(callback: types.CallbackQuery):
-    order_id = callback.data.replace("check_", "")
-    # Здесь должна быть проверка через TON API
-    # Пока просто подтверждаем
-    complete_order(order_id)
-    await callback.message.edit_text(
-        format_text(f"✅ Заказ #{order_id} оплачен!\n\nОжидайте отправки товара."),
-        parse_mode=ParseMode.HTML
-    )
-    await callback.answer("Спасибо! Мы проверяем оплату.", show_alert=True)
-
-    for admin_id in ADMIN_IDS:
-        try:
-            await bot.send_message(admin_id,
-                format_text(f"✅ Оплата по заказу #{order_id} подтверждена!\n\n⚡ Отправь товар на Fragment!"),
-                parse_mode=ParseMode.HTML
-            )
-        except:
-            pass
+        if paid_from_balance:
+            if subtract_balance(buyer.id, order_price):
+                create_order(order_id, buyer.id, order_type, item_text, order_quantity, recipient, order_price)
+                await message.answer(format_text(f"✅ Заказ #{order_id}\n🛍 {item_icon} {item_text}\n📩 {recipient}\n💰 С баланса: -{order_price} GRAM\nОстаток: {get_balance(buyer.id)} GRAM"), parse_mode=ParseMode.HTML)
+                for admin_id in ADMIN_IDS:
+                    try:
+                        await bot.send_message(admin_id, format_text(f"🔔 Заказ #{order_id}!\n👤 @{buyer.username or buyer.full_name}\n🛍 {item_icon} {item_text}\n📩 {recipient}\n💰 {order_price} GRAM (с баланса)\n⚡ Отправь товар!"), parse_mode=ParseMode.HTML)
+                    except: pass
+            else:
+                await message.answer(format_text("❌ Недостаточно средств на балансе"), parse_mode=ParseMode.HTML)
+        else:
+            create_order(order_id, buyer.id, order_type, item_text, order_quantity, recipient, order_price)
+            nano_amount = int(order_price * 1_000_000_000)
+            ton_link = f"ton://transfer/{WALLET_ADDRESS}?amount={nano_amount}&text=StarGram-{order_id}"
+            await message.answer(format_text(f"🛒 Заказ #{order_id}\n🛍 {item_icon} {item_text}\n📩 {recipient}\n💰 {order_price} GRAM\n👇 Оплатите через Tonkeeper"), reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="💳 Оплатить", url=ton_link)]]), parse_mode=ParseMode.HTML)
+            for admin_id in ADMIN_IDS:
+                try:
+                    await bot.send_message(admin_id, format_text(f"🔔 Заказ #{order_id}\n👤 @{buyer.username or buyer.full_name}\n🛍 {item_icon} {item_text}\n📩 {recipient}\n💰 {order_price} GRAM\n⏳ Ожидает оплаты"), parse_mode=ParseMode.HTML)
+                except: pass
 
 
 async def main():
-    print("Бот запущен с базой данных!")
+    print("Бот запущен!")
     print(f"💰 Кошелёк: {WALLET_ADDRESS}")
     await dp.start_polling(bot)
 
