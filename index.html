@@ -15,357 +15,88 @@
             --text-main: #ffffff;
             --text-muted: #8e8e93;
             --accent-gold: #f5c542;
+            --accent-blue: #4dabf7;
             --accent-green: #34c759;
             --accent-green-bg: rgba(52, 199, 89, 0.15);
             --accent-gold-bg: rgba(245, 197, 66, 0.15);
+            --accent-blue-bg: rgba(77, 171, 247, 0.15);
         }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-        body {
-            background: var(--bg-main);
-            color: var(--text-main);
-            padding: 16px;
-            padding-bottom: 80px;
-            overflow-x: hidden;
-        }
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            margin-bottom: 20px;
-            position: sticky;
-            top: 0;
-            background: var(--bg-main);
-            z-index: 10;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--accent-gold);
-            font-weight: 700;
-            font-size: 16px;
-        }
-        .badges-container {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        .balance-badge {
-            background: var(--accent-green-bg);
-            border: 1px solid rgba(52, 199, 89, 0.3);
-            border-radius: 20px;
-            padding: 6px 12px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--accent-green);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            transition: transform 0.1s;
-        }
-        .balance-badge:active {
-            transform: scale(0.95);
-        }
-        .admin-badge {
-            background: var(--accent-gold-bg);
-            border: 1px solid rgba(245, 197, 66, 0.3);
-            color: var(--accent-gold);
-            border-radius: 20px;
-            padding: 6px 12px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            gap: 4px;
-            transition: transform 0.1s;
-        }
-        .admin-badge:active {
-            transform: scale(0.95);
-        }
-        .tabs-wrapper {
-            margin-bottom: 20px;
-            padding-bottom: 4px;
-        }
-        .tabs {
-            display: flex;
-            gap: 10px;
-        }
-        .tab {
-            flex: 1;
-            text-align: center;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 6px;
-        }
-        .tab.active {
-            background: var(--accent-gold-bg);
-            color: var(--accent-gold);
-            border-color: var(--accent-gold);
-        }
-        .section {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-        .section.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .section-title {
-            font-size: 15px;
-            font-weight: 700;
-            margin-bottom: 14px;
-            color: var(--accent-gold);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 12px 16px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        .card:hover {
-            background: var(--bg-card-hover);
-            border-color: rgba(245, 197, 66, 0.4);
-        }
-        .card:active {
-            transform: scale(0.98);
-        }
-        .card-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .card-icon-img {
-            width: 42px;
-            height: 42px;
-            object-fit: contain;
-            flex-shrink: 0;
-            filter: drop-shadow(0 0 8px rgba(245, 197, 66, 0.5)) drop-shadow(0 0 16px rgba(245, 197, 66, 0.3));
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg-main); color: var(--text-main); padding: 16px; padding-bottom: 80px; overflow-x: hidden; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; margin-bottom: 20px; position: sticky; top: 0; background: var(--bg-main); z-index: 10; border-bottom: 1px solid var(--border-color); }
+        .logo { display: flex; align-items: center; gap: 6px; color: var(--accent-gold); font-weight: 700; font-size: 16px; }
+        .badges-container { display: flex; gap: 8px; align-items: center; }
+        .balance-badge { background: var(--accent-green-bg); border: 1px solid rgba(52, 199, 89, 0.3); border-radius: 20px; padding: 6px 12px; font-size: 13px; font-weight: 600; color: var(--accent-green); cursor: pointer; display: flex; align-items: center; gap: 4px; transition: transform 0.1s; }
+        .balance-badge:active { transform: scale(0.95); }
+        .admin-badge { background: var(--accent-gold-bg); border: 1px solid rgba(245, 197, 66, 0.3); color: var(--accent-gold); border-radius: 20px; padding: 6px 12px; font-size: 13px; font-weight: 600; cursor: pointer; display: none; align-items: center; gap: 4px; transition: transform 0.1s; }
+        .admin-badge:active { transform: scale(0.95); }
+        .tabs-wrapper { margin-bottom: 20px; padding-bottom: 4px; }
+        .tabs { display: flex; gap: 10px; }
+        .tab { flex: 1; text-align: center; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; gap: 6px; }
+        .tab.active { background: var(--accent-gold-bg); color: var(--accent-gold); border-color: var(--accent-gold); }
+        .tab-premium.active { background: var(--accent-blue-bg); color: var(--accent-blue); border-color: var(--accent-blue); }
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .section-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; color: var(--accent-gold); display: flex; align-items: center; gap: 6px; }
+        .section-title.premium { color: var(--accent-blue); }
+        .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 12px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.15s; }
+        .card:hover { background: var(--bg-card-hover); }
+        .card:active { transform: scale(0.98); }
+
+        /* Звёзды — золотое свечение */
+        .card-icon-star {
+            width: 52px; height: 52px;
+            object-fit: contain; flex-shrink: 0;
+            filter: drop-shadow(0 0 8px rgba(245, 197, 66, 0.6)) drop-shadow(0 0 18px rgba(245, 197, 66, 0.3));
             transition: filter 0.3s;
         }
-        .card:hover .card-icon-img {
-            filter: drop-shadow(0 0 12px rgba(245, 197, 66, 0.8)) drop-shadow(0 0 24px rgba(245, 197, 66, 0.5));
+        .card:hover .card-icon-star {
+            filter: drop-shadow(0 0 14px rgba(245, 197, 66, 0.9)) drop-shadow(0 0 28px rgba(245, 197, 66, 0.5));
         }
-        .card-info h3 {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-main);
+        .card-star:hover { border-color: rgba(245, 197, 66, 0.5); }
+
+        /* Premium — синее свечение */
+        .card-icon-premium {
+            width: 42px; height: 42px;
+            object-fit: contain; flex-shrink: 0;
+            filter: drop-shadow(0 0 8px rgba(77, 171, 247, 0.6)) drop-shadow(0 0 18px rgba(77, 171, 247, 0.3));
+            transition: filter 0.3s;
         }
-        .card-price {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--accent-green);
+        .card:hover .card-icon-premium {
+            filter: drop-shadow(0 0 14px rgba(77, 171, 247, 0.9)) drop-shadow(0 0 28px rgba(77, 171, 247, 0.5));
         }
-        .custom-input {
-            display: flex;
-            gap: 8px;
-            margin-top: 16px;
-        }
-        .input {
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-card);
-            color: var(--text-main);
-            font-size: 15px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .input:focus {
-            border-color: var(--accent-gold);
-        }
-        .custom-input input {
-            flex: 1;
-        }
-        .custom-input button {
-            background: linear-gradient(135deg, #f5c542, #e5a400);
-            color: #000;
-            border: none;
-            padding: 0 20px;
-            border-radius: 12px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-        .btn {
-            background: linear-gradient(135deg, #f5c542, #e5a400);
-            color: #000;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            width: 100%;
-            cursor: pointer;
-            margin-top: 12px;
-            transition: transform 0.1s;
-        }
-        .btn:active {
-            transform: scale(0.97);
-        }
-        .btn:disabled {
-            background: #333;
-            color: #777;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--accent-gold);
-            color: var(--accent-gold);
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            width: 100%;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.2s;
-        }
-        .btn-outline:active {
-            background: var(--accent-gold-bg);
-        }
-        .btn-small {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 8px;
-            width: 100%;
-            transition: all 0.2s;
-        }
-        .btn-small:hover {
-            color: var(--text-main);
-            border-color: #555;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .modal.active {
-            display: flex;
-            animation: fadeIn 0.2s;
-        }
-        .modal-content {
-            background: var(--bg-main);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 24px;
-            width: 100%;
-            max-width: 380px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
-        .modal-content h3 {
-            margin-bottom: 16px;
-            color: var(--text-main);
-            font-size: 20px;
-            text-align: center;
-        }
-        .recipient-found {
-            display: none;
-            align-items: center;
-            gap: 14px;
-            padding: 14px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            margin-top: 12px;
-        }
-        .recipient-found.show {
-            display: flex;
-            animation: fadeIn 0.2s;
-        }
-        .recipient-found img {
-            width: 46px;
-            height: 46px;
-            border-radius: 50%;
-            object-fit: cover;
-            background: #333;
-        }
-        .recipient-found .info .name {
-            font-size: 15px;
-            font-weight: bold;
-        }
-        .recipient-found .info .sub {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
-        .error-text {
-            color: #ff453a;
-            font-size: 13px;
-            margin-top: 8px;
-            display: none;
-            text-align: center;
-        }
-        .error-text.show {
-            display: block;
-        }
-        #ton-connect-container {
-            display: flex;
-            justify-content: center;
-            margin: 16px 0;
-        }
-        @keyframes confetti-fall {
-            0% { transform: translateY(-50px) rotate(0); opacity: 1; }
-            100% { transform: translateY(800px) rotate(720deg); opacity: 0; }
-        }
-        .confetti-piece {
-            position: fixed;
-            font-size: 28px;
-            animation: confetti-fall 2.5s ease-out forwards;
-            pointer-events: none;
-            z-index: 200;
-            top: -50px;
-        }
+        .card-premium:hover { border-color: rgba(77, 171, 247, 0.5); }
+
+        .card-left { display: flex; align-items: center; gap: 14px; }
+        .card-info h3 { font-size: 16px; font-weight: 600; color: var(--text-main); }
+        .card-price { font-size: 15px; font-weight: 700; color: var(--accent-green); }
+        .custom-input { display: flex; gap: 8px; margin-top: 16px; }
+        .input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); font-size: 15px; outline: none; transition: border-color 0.2s; }
+        .input:focus { border-color: var(--accent-gold); }
+        .custom-input input { flex: 1; }
+        .custom-input button { background: linear-gradient(135deg, #f5c542, #e5a400); color: #000; border: none; padding: 0 20px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+        .btn { background: linear-gradient(135deg, #f5c542, #e5a400); color: #000; border: none; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 12px; transition: transform 0.1s; }
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { background: #333; color: #777; cursor: not-allowed; transform: none; }
+        .btn-outline { background: transparent; border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+        .btn-outline:active { background: var(--accent-gold-bg); }
+        .btn-small { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-muted); padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 8px; width: 100%; transition: all 0.2s; }
+        .btn-small:hover { color: var(--text-main); border-color: #555; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+        .modal.active { display: flex; animation: fadeIn 0.2s; }
+        .modal-content { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 20px; padding: 24px; width: 100%; max-width: 380px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .modal-content h3 { margin-bottom: 16px; color: var(--text-main); font-size: 20px; text-align: center; }
+        .recipient-found { display: none; align-items: center; gap: 14px; padding: 14px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; margin-top: 12px; }
+        .recipient-found.show { display: flex; animation: fadeIn 0.2s; }
+        .recipient-found img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; background: #333; }
+        .recipient-found .info .name { font-size: 15px; font-weight: bold; }
+        .recipient-found .info .sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+        .error-text { color: #ff453a; font-size: 13px; margin-top: 8px; display: none; text-align: center; }
+        .error-text.show { display: block; }
+        #ton-connect-container { display: flex; justify-content: center; margin: 16px 0; }
+        @keyframes confetti-fall { 0% { transform: translateY(-50px) rotate(0); opacity: 1; } 100% { transform: translateY(800px) rotate(720deg); opacity: 0; } }
+        .confetti-piece { position: fixed; font-size: 28px; animation: confetti-fall 2.5s ease-out forwards; pointer-events: none; z-index: 200; top: -50px; }
     </style>
 </head>
 <body>
@@ -381,7 +112,7 @@
 <div class="tabs-wrapper">
     <div class="tabs">
         <div class="tab active" data-tab="stars">⭐ Звёзды</div>
-        <div class="tab" data-tab="premium">👑 Premium</div>
+        <div class="tab tab-premium" data-tab="premium">👑 Premium</div>
     </div>
 </div>
 
@@ -395,7 +126,7 @@
 </div>
 
 <div class="section" id="tab-premium">
-    <div class="section-title">👑 Telegram Premium</div>
+    <div class="section-title premium">👑 Telegram Premium</div>
     <div id="premium-list">Загрузка...</div>
 </div>
 
@@ -457,356 +188,126 @@
 </div>
 
 <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-
+    const tg = window.Telegram.WebApp; tg.expand();
     const API = "https://stargram-0c8j.onrender.com/api";
     const USER_ID = tg.initDataUnsafe?.user?.id || 0;
     const WALLET = "UQBoaCWXtSkgoygDPUns7vHUZFOuwDRzdZ5upaGXsavWzHc9";
     const ADMIN_IDS = [5312114620, 8310460385];
     const IS_ADMIN = ADMIN_IDS.includes(USER_ID);
+    if (IS_ADMIN) document.getElementById('adminBadge').style.display = 'flex';
 
-    if (IS_ADMIN) {
-        document.getElementById('adminBadge').style.display = 'flex';
-    }
+    let currentItem = null, tonPrice = 3.5, userBalance = 0, searchTimeout = null, userFound = false;
 
-    let currentItem = null;
-    let tonPrice = 3.5;
-    let userBalance = 0;
-    let searchTimeout = null;
-    let userFound = false;
-
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-        manifestUrl: 'https://alan7ipp.github.io/StarGram/tonconnect-manifest.json',
-        buttonRootId: 'ton-connect-container'
-    });
+    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl: 'https://alan7ipp.github.io/StarGram/tonconnect-manifest.json', buttonRootId: 'ton-connect-container' });
 
     const PRICES_USDT = {
-        stars: {
-            50: 0.75, 100: 1.50, 250: 3.75, 500: 7.50, 750: 11.25,
-            1000: 15.00, 2500: 37.50, 5000: 75.00, 10000: 150.00,
-            50000: 750.00, 100000: 1500.00, 1000000: 15000.00
-        },
-        premium: {
-            3: 11.99, 6: 15.99, 12: 28.99
-        }
+        stars: { 50:0.75, 100:1.50, 250:3.75, 500:7.50, 750:11.25, 1000:15.00, 2500:37.50, 5000:75.00, 10000:150.00, 50000:750.00, 100000:1500.00, 1000000:15000.00 },
+        premium: { 3:11.99, 6:15.99, 12:28.99 }
     };
 
-    function usdtToGram(usdt) {
-        return (usdt / tonPrice * 1.02).toFixed(2);
-    }
+    function usdtToGram(u) { return (u / tonPrice * 1.02).toFixed(2); }
 
-    // Твои новые прозрачные PNG
     const URL_STAR = 'https://i.ibb.co/MkDD7dKc/Screenshot-20260619-165338-Google-2.png';
     const URL_PREMIUM = 'https://i.ibb.co/bg3Z1nMb/1781880361490-1-1.png';
 
-    function getStarIcon() {
-        return `<img src="${URL_STAR}" class="card-icon-img" alt="star">`;
-    }
-
-    function getPremiumIcon() {
-        return `<img src="${URL_PREMIUM}" class="card-icon-img" alt="premium">`;
-    }
+    function getStarIcon() { return `<img src="${URL_STAR}" class="card-icon-star" alt="star">`; }
+    function getPremiumIcon() { return `<img src="${URL_PREMIUM}" class="card-icon-premium" alt="premium">`; }
 
     async function loadPrices() {
-        try {
-            const resp = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd');
-            const data = await resp.json();
-            tonPrice = data['the-open-network'].usd;
-        } catch(e) {}
-
-        let premiumHTML = '';
-        for (const [months, usdt] of Object.entries(PRICES_USDT.premium)) {
-            const gram = usdtToGram(usdt);
-            let label = months == 3 ? '3 месяца' : months == 6 ? '6 месяцев' : '12 месяцев';
-            premiumHTML += `
-                <div class="card" onclick="openBuy('premium', 'Premium на ${label}', ${gram}, ${months})">
-                    <div class="card-left">
-                        ${getPremiumIcon()}
-                        <div class="card-info"><h3>Premium на ${label}</h3></div>
-                    </div>
-                    <span class="card-price">${gram} GRAM</span>
-                </div>`;
+        try { const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd'); tonPrice = (await r.json())['the-open-network'].usd; } catch(e) {}
+        let h = '';
+        for (const [m, u] of Object.entries(PRICES_USDT.premium)) {
+            const g = usdtToGram(u), l = m == 3 ? '3 месяца' : m == 6 ? '6 месяцев' : '12 месяцев';
+            h += `<div class="card card-premium" onclick="openBuy('premium','Premium на ${l}',${g},${m})"><div class="card-left">${getPremiumIcon()}<div class="card-info"><h3>Premium на ${l}</h3></div></div><span class="card-price">${g} GRAM</span></div>`;
         }
-        document.getElementById('premium-list').innerHTML = premiumHTML;
-
-        let starsHTML = '';
-        [50, 100, 250, 500, 750, 1000, 2500, 5000, 10000, 50000, 100000, 1000000].forEach(qty => {
-            const gram = usdtToGram(PRICES_USDT.stars[qty]);
-            starsHTML += `
-                <div class="card" onclick="openBuy('stars', '${qty.toLocaleString()} звёзд', ${gram}, ${qty})">
-                    <div class="card-left">
-                        ${getStarIcon()}
-                        <div class="card-info"><h3>${qty.toLocaleString()} звёзд</h3></div>
-                    </div>
-                    <span class="card-price">${gram} GRAM</span>
-                </div>`;
+        document.getElementById('premium-list').innerHTML = h; h = '';
+        [50,100,250,500,750,1000,2500,5000,10000,50000,100000,1000000].forEach(q => {
+            const g = usdtToGram(PRICES_USDT.stars[q]);
+            h += `<div class="card card-star" onclick="openBuy('stars','${q.toLocaleString()} звёзд',${g},${q})"><div class="card-left">${getStarIcon()}<div class="card-info"><h3>${q.toLocaleString()} звёзд</h3></div></div><span class="card-price">${g} GRAM</span></div>`;
         });
-        document.getElementById('stars-list').innerHTML = starsHTML;
+        document.getElementById('stars-list').innerHTML = h;
     }
 
-    async function loadBalance() {
-        try {
-            const resp = await fetch(API + '/balance/' + USER_ID);
-            const data = await resp.json();
-            userBalance = data.balance || 0;
-            updateDisplay();
-        } catch(e) {}
-    }
+    async function loadBalance() { try { const r = await fetch(API + '/balance/' + USER_ID); userBalance = (await r.json()).balance; updateDisplay(); } catch(e) {} }
+    loadPrices(); loadBalance();
 
-    loadPrices();
-    loadBalance();
-
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById('tab-' + this.dataset.tab).classList.add('active');
-        });
-    });
+    document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', function() {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active', 'tab-premium'));
+        this.classList.add('active');
+        if (this.dataset.tab === 'premium') this.classList.add('tab-premium');
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+    }));
 
     async function searchUser() {
-        const input = document.getElementById('recipientInput').value.trim();
-        const foundBox = document.getElementById('recipientFound');
-        const avatar = document.getElementById('recipientAvatar');
-        const nameEl = document.getElementById('recipientName');
-        const errorText = document.getElementById('errorText');
-        const buyBtn = document.getElementById('btnBuy');
-
+        const v = document.getElementById('recipientInput').value.trim();
+        const fb = document.getElementById('recipientFound'), av = document.getElementById('recipientAvatar');
+        const nm = document.getElementById('recipientName'), et = document.getElementById('errorText'), bb = document.getElementById('btnBuy');
         if (searchTimeout) clearTimeout(searchTimeout);
-
-        if (input.length < 2) {
-            foundBox.classList.remove('show');
-            errorText.classList.remove('show');
-            buyBtn.disabled = true;
-            userFound = false;
-            return;
-        }
-
-        const username = input.startsWith('@') ? input.substring(1) : input;
-
+        if (v.length < 2) { fb.classList.remove('show'); et.classList.remove('show'); bb.disabled = true; userFound = false; return; }
+        const u = v.startsWith('@') ? v.substring(1) : v;
         searchTimeout = setTimeout(async () => {
             try {
-                const resp = await fetch(API + '/telegram/user/' + username);
-                const data = await resp.json();
-
-                if (data.error) {
-                    foundBox.classList.remove('show');
-                    errorText.classList.add('show');
-                    buyBtn.disabled = true;
-                    userFound = false;
-                } else {
-                    nameEl.textContent = data.name || username;
-                    const placeholder = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46"><rect fill="%23333" width="46" height="46" rx="23"/><text fill="%23888" x="23" y="31" text-anchor="middle" font-size="20">' + (username[0]||'?').toUpperCase() + '</text></svg>');
-                    avatar.src = data.photo || placeholder;
-                    avatar.onerror = function() { this.src = placeholder; };
-                    foundBox.classList.add('show');
-                    errorText.classList.remove('show');
-                    buyBtn.disabled = false;
-                    userFound = true;
+                const r = await fetch(API + '/telegram/user/' + u); const d = await r.json();
+                if (d.error) { fb.classList.remove('show'); et.classList.add('show'); bb.disabled = true; userFound = false; }
+                else {
+                    nm.textContent = d.name || u;
+                    av.src = d.photo || ('data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46"><rect fill="%23333" width="46" height="46" rx="23"/><text fill="%23888" x="23" y="31" text-anchor="middle" font-size="20">' + (u[0]||'?').toUpperCase() + '</text></svg>'));
+                    fb.classList.add('show'); et.classList.remove('show'); bb.disabled = false; userFound = true;
                 }
-            } catch(e) {
-                foundBox.classList.remove('show');
-                errorText.classList.remove('show');
-                buyBtn.disabled = true;
-                userFound = false;
-            }
+            } catch(e) { fb.classList.remove('show'); et.classList.remove('show'); bb.disabled = true; userFound = false; }
         }, 500);
     }
 
-    function fillMyUsername() {
-        const myUsername = tg.initDataUnsafe?.user?.username;
-        if (myUsername) {
-            document.getElementById('recipientInput').value = '@' + myUsername;
-            searchUser();
-        } else {
-            tg.showAlert('У вас нет username в Telegram!');
-        }
-    }
-
-    function openBuy(type, name, price, quantity) {
-        currentItem = { type, name, price, quantity };
-        document.getElementById('modalTitle').textContent = name;
-        document.getElementById('modalPrice').innerHTML = `${price} GRAM<br><span style="font-size:13px;color:#8e8e93;font-weight:normal;">Доступно: ${userBalance.toFixed(2)} GRAM</span>`;
-        document.getElementById('recipientInput').value = '';
-        document.getElementById('recipientFound').classList.remove('show');
-        document.getElementById('errorText').classList.remove('show');
-        document.getElementById('btnBuy').disabled = true;
-        document.getElementById('insufficientText').style.display = 'none';
-        document.getElementById('btnDepositNeeded').style.display = 'none';
-        document.getElementById('btnBuy').style.display = 'block';
+    function fillMyUsername() { const u = tg.initDataUnsafe?.user?.username; if (u) { document.getElementById('recipientInput').value = '@' + u; searchUser(); } else tg.showAlert('Нет username!'); }
+    function openBuy(t, n, p, q) {
+        currentItem = { type: t, name: n, price: p, quantity: q };
+        document.getElementById('modalTitle').textContent = n;
+        document.getElementById('modalPrice').innerHTML = `${p} GRAM<br><span style="font-size:13px;color:#8e8e93;font-weight:normal;">Доступно: ${userBalance.toFixed(2)} GRAM</span>`;
+        document.getElementById('recipientInput').value = ''; document.getElementById('recipientFound').classList.remove('show'); document.getElementById('errorText').classList.remove('show');
+        document.getElementById('btnBuy').disabled = true; document.getElementById('insufficientText').style.display = 'none'; document.getElementById('btnDepositNeeded').style.display = 'none'; document.getElementById('btnBuy').style.display = 'block';
         userFound = false;
-
-        const priceNum = parseFloat(price);
-        if (userBalance < priceNum) {
-            const needed = (priceNum - userBalance).toFixed(2);
-            document.getElementById('insufficientText').textContent = '⚠️ Не хватает ' + needed + ' GRAM';
-            document.getElementById('insufficientText').style.display = 'block';
-            document.getElementById('btnDepositNeeded').style.display = 'block';
-            document.getElementById('btnBuy').style.display = 'none';
-        }
-
-        document.getElementById('modalBuy').classList.add('active');
-        setTimeout(() => document.getElementById('recipientInput').focus(), 300);
+        const pn = parseFloat(p);
+        if (userBalance < pn) { document.getElementById('insufficientText').textContent = '⚠️ Не хватает ' + (pn - userBalance).toFixed(2) + ' GRAM'; document.getElementById('insufficientText').style.display = 'block'; document.getElementById('btnDepositNeeded').style.display = 'block'; document.getElementById('btnBuy').style.display = 'none'; }
+        document.getElementById('modalBuy').classList.add('active'); setTimeout(() => document.getElementById('recipientInput').focus(), 300);
     }
 
-    function buyCustomStars() {
-        const qty = parseInt(document.getElementById('customStarsQty').value);
-        if (!qty || qty < 50) return tg.showAlert('Минимум 50 звёзд!');
-        if (qty > 100000000) return tg.showAlert('Максимум 100 000 000 звёзд!');
-        const usdt = qty * 0.015;
-        openBuy('stars', qty.toLocaleString() + ' звёзд', usdtToGram(usdt), qty);
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).classList.remove('active');
-    }
+    function buyCustomStars() { const q = parseInt(document.getElementById('customStarsQty').value); if (!q || q < 50) return tg.showAlert('Минимум 50!'); if (q > 100000000) return tg.showAlert('Максимум 100M!'); openBuy('stars', q.toLocaleString() + ' звёзд', usdtToGram(q * 0.015), q); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
     async function confirmBuy() {
-        if (!userFound) return tg.showAlert('Сначала найдите получателя!');
-        const recipient = document.getElementById('recipientInput').value.trim();
-        if (!recipient) return tg.showAlert('Введите username получателя!');
-        if (!currentItem) return;
-
-        const price = parseFloat(currentItem.price);
-        if (userBalance >= price) {
-            const resp = await fetch(API + '/order', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    tg_id: USER_ID,
-                    type: currentItem.type,
-                    name: currentItem.name,
-                    price: currentItem.price,
-                    quantity: currentItem.quantity,
-                    recipient: recipient,
-                    paid_from_balance: true
-                })
-            });
-            const result = await resp.json();
-
-            if (result.status === 'ok') {
-                userBalance -= price;
-                updateDisplay();
-                closeModal('modalBuy');
-                showStarsConfetti();
-                showSuccess('✅ Покупка совершена!',
-                    '🛍 ' + currentItem.name + '\n📩 ' + recipient + '\n💰 С баланса: -' + price.toFixed(2) + ' GRAM');
-            }
-        } else {
-            openDeposit();
-        }
+        if (!userFound) return tg.showAlert('Найдите получателя!');
+        const r = document.getElementById('recipientInput').value.trim(); if (!r || !currentItem) return;
+        const p = parseFloat(currentItem.price);
+        if (userBalance >= p) {
+            const resp = await fetch(API + '/order', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ tg_id:USER_ID, type:currentItem.type, name:currentItem.name, price:currentItem.price, quantity:currentItem.quantity, recipient:r, paid_from_balance:true }) });
+            const d = await resp.json();
+            if (d.status === 'ok') { userBalance -= p; updateDisplay(); closeModal('modalBuy'); showStarsConfetti(); showSuccess('✅ Покупка совершена!', '🛍 ' + currentItem.name + '\n📩 ' + r + '\n💰 -' + p.toFixed(2) + ' GRAM'); }
+        } else openDeposit();
     }
 
-    function openDeposit() {
-        document.getElementById('depositAmount').value = '';
-        document.getElementById('modalDeposit').classList.add('active');
-    }
-
+    function openDeposit() { document.getElementById('depositAmount').value = ''; document.getElementById('modalDeposit').classList.add('active'); }
     async function deposit() {
-        const amount = parseFloat(document.getElementById('depositAmount').value);
-        if (!amount || amount < 0.1) return tg.showAlert('Минимум 0.1 GRAM!');
-
-        const wallet = tonConnectUI.wallet;
-        if (!wallet) return tg.showAlert('Сначала привяжите кошелёк (кнопка выше)!');
-
-        const nanoAmount = Math.floor(amount * 1_000_000_000);
-
+        const a = parseFloat(document.getElementById('depositAmount').value); if (!a || a < 0.1) return tg.showAlert('Минимум 0.1 GRAM!');
+        if (!tonConnectUI.wallet) return tg.showAlert('Привяжите кошелёк!');
         try {
-            const result = await tonConnectUI.sendTransaction({
-                validUntil: Math.floor(Date.now() / 1000) + 300,
-                messages: [{ address: WALLET, amount: nanoAmount.toString() }]
-            });
-
-            if (result && result.boc) {
-                await fetch(API + '/deposit/confirm', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        tg_id: USER_ID,
-                        amount: amount,
-                        tx_hash: result.boc
-                    })
-                });
-
-                userBalance += amount;
-                updateDisplay();
-                closeModal('modalDeposit');
-                showStarsConfetti();
-                showSuccess('✅ Баланс пополнен!',
-                    '💰 +' + amount + ' GRAM\nБаланс: ' + userBalance.toFixed(2) + ' GRAM');
-            }
-        } catch(e) {
-            if (e.message && e.message.includes('declined')) {
-                tg.showAlert('Платёж отменён. Баланс не изменён.');
-            } else {
-                tg.showAlert('Ошибка транзакции. Попробуйте снова.');
-            }
-        }
+            const r = await tonConnectUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+300, messages:[{ address: WALLET, amount: Math.floor(a*1e9).toString() }] });
+            if (r && r.boc) { await fetch(API + '/deposit/confirm', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ tg_id:USER_ID, amount:a, tx_hash:r.boc }) }); userBalance += a; updateDisplay(); closeModal('modalDeposit'); showStarsConfetti(); showSuccess('✅ Пополнено!', '💰 +' + a + ' GRAM'); }
+        } catch(e) { tg.showAlert('Платёж отменён или ошибка.'); }
     }
 
-    // Фейерверк только из звёзд ⭐
-    function showStarsConfetti() {
-        const stars = ['⭐', '⭐', '⭐', '⭐', '⭐', '🌟', '✨', '💫'];
-        for (let i = 0; i < 35; i++) {
-            setTimeout(() => {
-                const piece = document.createElement('div');
-                piece.className = 'confetti-piece';
-                piece.textContent = stars[Math.floor(Math.random() * stars.length)];
-                piece.style.left = Math.random() * 100 + '%';
-                piece.style.animationDuration = (1.5 + Math.random() * 2) + 's';
-                piece.style.fontSize = (20 + Math.random() * 20) + 'px';
-                document.body.appendChild(piece);
-                setTimeout(() => piece.remove(), 3500);
-            }, i * 30);
-        }
-    }
+    function showStarsConfetti() { const s = ['⭐','⭐','⭐','⭐','⭐','🌟','✨','💫']; for (let i=0;i<35;i++) setTimeout(()=>{ const p=document.createElement('div'); p.className='confetti-piece'; p.textContent=s[Math.floor(Math.random()*s.length)]; p.style.left=Math.random()*100+'%'; p.style.animationDuration=(1.5+Math.random()*2)+'s'; p.style.fontSize=(20+Math.random()*20)+'px'; document.body.appendChild(p); setTimeout(()=>p.remove(),3500); },i*30); }
+    function showSuccess(t, tx) { document.getElementById('successTitle').textContent = t; document.getElementById('successText').textContent = tx; document.getElementById('modalSuccess').classList.add('active'); }
+    function updateDisplay() { document.getElementById('balanceDisplay').textContent = '🪙 ' + userBalance.toFixed(2) + ' GRAM'; }
 
-    function showSuccess(title, text) {
-        document.getElementById('successTitle').textContent = title;
-        document.getElementById('successText').textContent = text;
-        document.getElementById('modalSuccess').classList.add('active');
-    }
-
-    function updateDisplay() {
-        document.getElementById('balanceDisplay').textContent = '🪙 ' + userBalance.toFixed(2) + ' GRAM';
-    }
-
-    function openAdmin() {
-        if (!IS_ADMIN) return;
-        document.getElementById('adminUserId').value = '';
-        document.getElementById('adminAmount').value = '';
-        document.getElementById('adminReason').value = '';
-        document.getElementById('modalAdmin').classList.add('active');
-    }
-
-    async function adminAction(action) {
-        const uid = parseInt(document.getElementById('adminUserId').value);
-        if (!uid) return tg.showAlert('Введите ID пользователя!');
-
+    function openAdmin() { if(!IS_ADMIN)return; document.getElementById('adminUserId').value=''; document.getElementById('adminAmount').value=''; document.getElementById('adminReason').value=''; document.getElementById('modalAdmin').classList.add('active'); }
+    async function adminAction(act) {
+        const uid = parseInt(document.getElementById('adminUserId').value); if (!uid) return tg.showAlert('Введите ID!');
         try {
-            const resp = await fetch(API + '/admin/' + action, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    admin_id: USER_ID,
-                    user_id: uid,
-                    amount: document.getElementById('adminAmount').value,
-                    reason: document.getElementById('adminReason').value,
-                    hours: action === 'ban' ? parseFloat(document.getElementById('adminAmount').value) : 0
-                })
-            });
-            const data = await resp.json();
-            if (data.status === 'ok') {
-                closeModal('modalAdmin');
-                tg.showAlert('✅ Команда выполнена!');
-            } else {
-                tg.showAlert('Ошибка / не найдено');
-            }
-        } catch(e) {
-            tg.showAlert('Ошибка связи с сервером');
-        }
+            const r = await fetch(API + '/admin/' + act, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ admin_id:USER_ID, user_id:uid, amount:document.getElementById('adminAmount').value, reason:document.getElementById('adminReason').value, hours:act==='ban'?parseFloat(document.getElementById('adminAmount').value):0 }) });
+            const d = await r.json();
+            if (d.status === 'ok') { closeModal('modalAdmin'); tg.showAlert('✅ Готово!'); } else tg.showAlert('Ошибка');
+        } catch(e) { tg.showAlert('Ошибка связи'); }
     }
 
     updateDisplay();
