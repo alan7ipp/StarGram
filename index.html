@@ -136,8 +136,8 @@
             gap: 10px;
         }
         .card-icon-svg {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             flex-shrink: 0;
         }
         .card-info h3 {
@@ -466,41 +466,38 @@
             return (usdt / tonPrice * 1.02).toFixed(2);
         }
 
-        // === SVG ИКОНКИ (КАК В TELEGRAM) ===
-        // Золотая звезда Telegram Stars
+        // === SVG ИКОНКИ ОТ CHATGPT (ТОЧНЫЕ КОПИИ TELEGRAM) ===
         function getStarSVG() {
-            return '<svg width="36" height="36" viewBox="0 0 36 36">' +
+            return '<svg class="card-icon-svg" viewBox="0 0 128 128">' +
                 '<defs>' +
-                '<linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
-                '<stop offset="0%" style="stop-color:#FFE55C"/>' +
-                '<stop offset="50%" style="stop-color:#FFD700"/>' +
-                '<stop offset="100%" style="stop-color:#FFA500"/>' +
+                '<linearGradient id="starGold" x1="0%" y1="0%" x2="100%" y2="100%">' +
+                '<stop offset="0%" stop-color="#FFF3B0"/>' +
+                '<stop offset="45%" stop-color="#FFD54F"/>' +
+                '<stop offset="100%" stop-color="#F4B400"/>' +
                 '</linearGradient>' +
-                '<filter id="starGlow">' +
-                '<feGaussianBlur stdDeviation="0.8" result="blur"/>' +
-                '<feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>' +
+                '<filter id="glow">' +
+                '<feGaussianBlur stdDeviation="3" result="blur"/>' +
+                '<feMerge>' +
+                '<feMergeNode in="blur"/>' +
+                '<feMergeNode in="SourceGraphic"/>' +
+                '</feMerge>' +
                 '</filter>' +
                 '</defs>' +
-                '<polygon points="18,2 22,13 34,14 25,21 27,33 18,26 9,33 11,21 2,14 14,13" fill="url(#starGrad)" stroke="#DAA520" stroke-width="1.2" filter="url(#starGlow)"/>' +
+                '<polygon filter="url(#glow)" fill="url(#starGold)" points="64,8 80,46 120,46 88,70 100,112 64,88 28,112 40,70 8,46 48,46"/>' +
                 '</svg>';
         }
 
-        // Иконка Telegram Premium (золотой круг с звездой)
         function getPremiumSVG() {
-            return '<svg width="36" height="36" viewBox="0 0 36 36">' +
+            return '<svg class="card-icon-svg" viewBox="0 0 128 128">' +
                 '<defs>' +
-                '<linearGradient id="premGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
-                '<stop offset="0%" style="stop-color:#FFD700"/>' +
-                '<stop offset="50%" style="stop-color:#FFF8DC"/>' +
-                '<stop offset="100%" style="stop-color:#FFD700"/>' +
+                '<linearGradient id="crownGold" x1="0%" y1="0%" x2="100%" y2="100%">' +
+                '<stop offset="0%" stop-color="#FFF7C7"/>' +
+                '<stop offset="50%" stop-color="#FFD54F"/>' +
+                '<stop offset="100%" stop-color="#E0A106"/>' +
                 '</linearGradient>' +
-                '<filter id="premGlow">' +
-                '<feGaussianBlur stdDeviation="1" result="blur"/>' +
-                '<feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>' +
-                '</filter>' +
                 '</defs>' +
-                '<circle cx="18" cy="18" r="15" fill="url(#premGrad)" stroke="#DAA520" stroke-width="2" filter="url(#premGlow)"/>' +
-                '<polygon points="18,8 20,15 27,16 21,20 23,28 18,24 13,28 15,20 9,16 16,15" fill="#FFF" opacity="0.95"/>' +
+                '<path fill="url(#crownGold)" d="M20 90 L30 40 L55 65 L64 22 L73 65 L98 40 L108 90 Z"/>' +
+                '<rect x="20" y="90" width="88" height="14" rx="7" fill="#F4B400"/>' +
                 '</svg>';
         }
 
@@ -526,7 +523,7 @@
                 premiumHTML += `
                     <div class="card" onclick="openBuy('premium', 'Premium на ${label}', ${gram}, ${months})">
                         <div class="card-left">
-                            <span class="card-icon-svg">${getPremiumSVG()}</span>
+                            ${getPremiumSVG()}
                             <div class="card-info"><h3>Premium на ${label}</h3></div>
                         </div>
                         <span class="card-price">${gram} GRAM</span>
@@ -542,7 +539,7 @@
                 starsHTML += `
                     <div class="card" onclick="openBuy('stars', '${qty.toLocaleString()} звёзд', ${gram}, ${qty})">
                         <div class="card-left">
-                            <span class="card-icon-svg">${getStarSVG()}</span>
+                            ${getStarSVG()}
                             <div class="card-info"><h3>${qty.toLocaleString()} звёзд</h3></div>
                         </div>
                         <span class="card-price">${gram} GRAM</span>
@@ -604,13 +601,11 @@
                     const data = await resp.json();
 
                     if (data.error) {
-                        // Не найден
                         foundBox.classList.remove('show');
                         errorText.classList.add('show');
                         buyBtn.disabled = true;
                         userFound = false;
                     } else {
-                        // Найден
                         nameEl.textContent = data.name || username;
                         if (data.photo) {
                             avatar.src = data.photo;
