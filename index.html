@@ -44,9 +44,9 @@
         .card:hover { background: var(--bg-card-hover); }
         .card:active { transform: scale(0.98); }
 
-        /* Звёзды — золотое свечение */
+        /* Звёзды — золотое свечение, 58px */
         .card-icon-star {
-            width: 52px; height: 52px;
+            width: 58px; height: 58px;
             object-fit: contain; flex-shrink: 0;
             filter: drop-shadow(0 0 8px rgba(245, 197, 66, 0.6)) drop-shadow(0 0 18px rgba(245, 197, 66, 0.3));
             transition: filter 0.3s;
@@ -56,9 +56,9 @@
         }
         .card-star:hover { border-color: rgba(245, 197, 66, 0.5); }
 
-        /* Premium — синее свечение */
+        /* Premium — синее свечение, 58px */
         .card-icon-premium {
-            width: 42px; height: 42px;
+            width: 58px; height: 58px;
             object-fit: contain; flex-shrink: 0;
             filter: drop-shadow(0 0 8px rgba(77, 171, 247, 0.6)) drop-shadow(0 0 18px rgba(77, 171, 247, 0.3));
             transition: filter 0.3s;
@@ -117,7 +117,7 @@
 </div>
 
 <div class="section active" id="tab-stars">
-    <div class="section-title">💎 Telegram Stars (от 50 до 100 000 000)</div>
+    <div class="section-title">💎 Telegram Stars</div>
     <div id="stars-list">Загрузка...</div>
     <div class="custom-input">
         <input type="number" id="customStarsQty" class="input" placeholder="Своё количество" min="50" max="100000000">
@@ -207,6 +207,7 @@
 
     function usdtToGram(u) { return (u / tonPrice * 1.02).toFixed(2); }
 
+    // Картинки правильно: звезда для звёзд, premium для premium
     const URL_STAR = 'https://i.ibb.co/MkDD7dKc/Screenshot-20260619-165338-Google-2.png';
     const URL_PREMIUM = 'https://i.ibb.co/bg3Z1nMb/1781880361490-1-1.png';
 
