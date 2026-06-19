@@ -7,47 +7,317 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f0f0f;color:#fff;padding:16px;padding-bottom:80px}
-        .top-bar{display:flex;justify-content:space-between;align-items:center;padding:10px 0;margin-bottom:16px}
-        .balance-badge{background:#1a1a1a;border:1px solid #333;border-radius:20px;padding:8px 14px;font-size:14px;font-weight:bold;color:#4caf50;cursor:pointer}
-        .admin-badge{background:#f5c542;color:#000;border-radius:12px;padding:4px 10px;font-size:12px;font-weight:bold;margin-left:8px;cursor:pointer}
-        .tabs{display:flex;gap:8px;margin-bottom:16px}
-        .tab{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:20px;padding:10px 18px;font-size:14px;font-weight:bold;cursor:pointer;color:#aaa}
-        .tab.active{background:#f5c542;color:#000}
-        .section{margin-bottom:20px;display:none}
-        .section.active{display:block}
-        .section-title{font-size:18px;font-weight:bold;margin-bottom:12px;color:#f5c542}
-        .card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:0.2s}
-        .card:hover{background:#222;border-color:#f5c542}
-        .card-left{display:flex;align-items:center;gap:10px}
-        .card-icon{font-size:28px}
-        .card-info h3{font-size:15px}
-        .card-price{font-size:15px;font-weight:bold;color:#4caf50}
-        .custom-input{display:flex;gap:8px;margin-top:10px}
-        .custom-input input{flex:1;padding:12px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;font-size:14px}
-        .custom-input button{background:#f5c542;color:#000;border:none;padding:12px 16px;border-radius:8px;font-weight:bold;cursor:pointer}
-        .btn{background:#f5c542;color:#000;border:none;padding:14px;border-radius:10px;font-size:16px;font-weight:bold;width:100%;cursor:pointer;margin-top:10px}
-        .btn:disabled{background:#444;color:#888;cursor:not-allowed}
-        .btn-outline{background:transparent;border:1px solid #f5c542;color:#f5c542;padding:14px;border-radius:10px;font-size:16px;font-weight:bold;width:100%;cursor:pointer;margin-top:10px}
-        .btn-small{background:transparent;border:1px solid #444;color:#aaa;padding:8px;border-radius:8px;font-size:12px;cursor:pointer;margin-top:4px;width:100%}
-        .input{width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:#fff;font-size:14px;margin-top:8px}
-        .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:100;align-items:center;justify-content:center}
-        .modal.active{display:flex}
-        .modal-content{background:#1a1a1a;border:1px solid #333;border-radius:16px;padding:20px;width:90%;max-width:400px;max-height:90vh;overflow-y:auto}
-        .modal-content h3{margin-bottom:12px;color:#f5c542}
-        .recipient-found{display:none;align-items:center;gap:12px;padding:12px;background:#222;border-radius:12px;margin-top:10px}
-        .recipient-found.show{display:flex}
-        .recipient-found img{width:48px;height:48px;border-radius:50%;object-fit:cover}
-        .recipient-found .name{font-size:15px;font-weight:bold;color:#fff}
-        .error-text{color:#ff4444;font-size:13px;margin-top:8px;display:none}
-        .error-text.show{display:block}
-        #ton-connect-container{display:flex;justify-content:center;margin:10px 0}
-        @keyframes confetti{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(-200px) rotate(720deg);opacity:0}}
-        .confetti{position:fixed;top:50%;left:50%;font-size:30px;animation:confetti 1s ease-out forwards;pointer-events:none;z-index:200}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            padding: 16px;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            margin-bottom: 16px;
+            position: sticky;
+            top: 0;
+            background: #0f0f0f;
+            z-index: 10;
+        }
+        .balance-badge {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 20px;
+            padding: 8px 14px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #4caf50;
+            cursor: pointer;
+        }
+        .admin-badge {
+            background: #f5c542;
+            color: #000;
+            border-radius: 12px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+        .header {
+            text-align: center;
+            padding: 10px 0 20px 0;
+            border-bottom: 1px solid #222;
+            margin-bottom: 16px;
+        }
+        .header h1 {
+            font-size: 22px;
+            color: #f5c542;
+        }
+        .header p {
+            color: #888;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        .tabs-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 16px;
+            padding-bottom: 4px;
+        }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            white-space: nowrap;
+            min-width: max-content;
+        }
+        .tab {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 20px;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+            transition: 0.2s;
+            display: inline-block;
+        }
+        .tab.active {
+            background: #f5c542;
+            color: #000;
+            border-color: #f5c542;
+        }
+        .tab:hover {
+            background: #222;
+        }
+        .tab.active:hover {
+            background: #f5c542;
+        }
+        .section {
+            margin-bottom: 20px;
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #f5c542;
+        }
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .card:hover {
+            background: #222;
+            border-color: #f5c542;
+        }
+        .card-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-icon {
+            width: 32px;
+            height: 32px;
+        }
+        .card-info h3 {
+            font-size: 15px;
+        }
+        .card-price {
+            font-size: 15px;
+            font-weight: bold;
+            color: #4caf50;
+        }
+        .custom-input {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .custom-input input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 14px;
+        }
+        .custom-input button {
+            background: #f5c542;
+            color: #000;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn {
+            background: #f5c542;
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #f5c542;
+            color: #f5c542;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-small {
+            background: transparent;
+            border: 1px solid #444;
+            color: #aaa;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 4px;
+            width: 100%;
+        }
+        .btn-small:hover {
+            border-color: #f5c542;
+            color: #f5c542;
+        }
+        .input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-content h3 {
+            margin-bottom: 12px;
+            color: #f5c542;
+        }
+        .modal-content p {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .recipient-found {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #222;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+        .recipient-found.show {
+            display: flex;
+        }
+        .recipient-found img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #333;
+        }
+        .recipient-found .info .name {
+            font-size: 15px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .recipient-found .info .sub {
+            font-size: 12px;
+            color: #888;
+        }
+        .error-text {
+            color: #ff4444;
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+        .error-text.show {
+            display: block;
+        }
+        #ton-connect-container {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        @keyframes confetti-fall {
+            0% { transform: translateY(0) rotate(0); opacity: 1; }
+            100% { transform: translateY(-250px) rotate(720deg); opacity: 0; }
+        }
+        .confetti-piece {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            font-size: 28px;
+            animation: confetti-fall 1.2s ease-out forwards;
+            pointer-events: none;
+            z-index: 200;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Верхняя панель -->
     <div class="top-bar">
         <span style="color:#f5c542;font-weight:bold;">⭐ StarGram</span>
         <div>
@@ -55,150 +325,519 @@
             <span class="admin-badge" id="adminBadge" style="display:none;" onclick="openAdmin()">👑 Админ</span>
         </div>
     </div>
-    <div class="tabs">
-        <div class="tab active" data-tab="stars">⭐ Звёзды</div>
-        <div class="tab" data-tab="premium">👑 Premium</div>
-        <div class="tab" data-tab="orders">📜 Заказы</div>
-        <div class="tab" data-tab="ref">👥 Друзья</div>
+
+    <!-- Табы с горизонтальным скроллом -->
+    <div class="tabs-wrapper">
+        <div class="tabs">
+            <div class="tab active" data-tab="stars">⭐ Звёзды</div>
+            <div class="tab" data-tab="premium">👑 Premium</div>
+        </div>
     </div>
+
+    <!-- Вкладка Звёзды -->
     <div class="section active" id="tab-stars">
-        <div class="section-title">💎 Telegram Stars (50 – 100 000 000)</div>
+        <div class="section-title">💎 Telegram Stars (от 50 до 100 000 000)</div>
         <div id="stars-list">Загрузка...</div>
-        <div class="custom-input"><input type="number" id="customStarsQty" placeholder="Своё количество" min="50" max="100000000"><button onclick="buyCustomStars()">Купить</button></div>
+        <div class="custom-input">
+            <input type="number" id="customStarsQty" placeholder="Своё количество (50-100M)" min="50" max="100000000">
+            <button onclick="buyCustomStars()">Купить</button>
+        </div>
     </div>
+
+    <!-- Вкладка Premium -->
     <div class="section" id="tab-premium">
         <div class="section-title">👑 Telegram Premium</div>
         <div id="premium-list">Загрузка...</div>
     </div>
-    <div class="section" id="tab-orders">
-        <div class="section-title">📜 История покупок</div>
-        <div id="orders-list">Загрузка...</div>
-    </div>
-    <div class="section" id="tab-ref">
-        <div class="section-title">👥 Рефералы</div>
-        <p id="refInfo">Загрузка...</p>
-        <button class="btn" onclick="copyRefLink()">📋 Копировать ссылку</button>
+
+    <!-- Модалка покупки -->
+    <div class="modal" id="modalBuy">
+        <div class="modal-content">
+            <h3 id="modalTitle">Покупка</h3>
+            <p style="color:#4caf50;font-weight:bold;" id="modalPrice"></p>
+            <input class="input" type="text" id="recipientInput" placeholder="Username получателя (@username)" oninput="searchUser()">
+            <button class="btn-small" onclick="fillMyUsername()">📩 Отправить себе</button>
+            <div class="recipient-found" id="recipientFound">
+                <img id="recipientAvatar" src="" alt="avatar">
+                <div class="info">
+                    <div class="name" id="recipientName"></div>
+                    <div class="sub">Получатель</div>
+                </div>
+            </div>
+            <div class="error-text" id="errorText">⚠️ Пользователь не найден в Telegram</div>
+            <div class="error-text" id="insufficientText" style="display:none;"></div>
+            <button class="btn" id="btnBuy" onclick="confirmBuy()" disabled>Купить сейчас</button>
+            <button class="btn-outline" id="btnDepositNeeded" onclick="openDeposit()" style="display:none;">💰 Пополнить баланс</button>
+            <button class="btn-outline" onclick="closeModal('modalBuy')">Отмена</button>
+        </div>
     </div>
 
-    <div class="modal" id="modalBuy"><div class="modal-content">
-        <h3 id="modalTitle">Покупка</h3><p style="color:#4caf50;font-weight:bold;" id="modalPrice"></p>
-        <input class="input" id="recipientInput" placeholder="Username (@username)" oninput="searchUser()">
-        <button class="btn-small" onclick="fillMyUsername()">📩 Отправить себе</button>
-        <div class="recipient-found" id="recipientFound"><img id="recipientAvatar"><span class="name" id="recipientName"></span></div>
-        <div class="error-text" id="errorText">⚠️ Пользователь не найден в Telegram</div>
-        <div id="insufficientText" style="color:#ff4444;font-size:13px;margin-top:8px;display:none;"></div>
-        <button class="btn" id="btnBuy" onclick="confirmBuy()" disabled>Купить сейчас</button>
-        <button class="btn-outline" id="btnDepositNeeded" onclick="openDeposit()" style="display:none;">💰 Пополнить баланс</button>
-        <button class="btn-outline" onclick="closeModal('modalBuy')">Отмена</button>
-    </div></div>
-    <div class="modal" id="modalDeposit"><div class="modal-content">
-        <h3>🪙 Пополнение</h3><input class="input" id="depositAmount" placeholder="Минимум 0.1 GRAM" min="0.1" step="0.1">
-        <div id="ton-connect-container"></div>
-        <button class="btn" onclick="deposit()">🪙 Пополнить</button>
-        <button class="btn-outline" onclick="closeModal('modalDeposit')">Отмена</button>
-    </div></div>
-    <div class="modal" id="modalSuccess"><div class="modal-content" style="text-align:center;">
-        <h3 id="successTitle">✅</h3><p id="successText"></p>
-        <button class="btn" onclick="closeModal('modalSuccess')">ОК</button>
-    </div></div>
-    <div class="modal" id="modalAdmin"><div class="modal-content">
-        <h3>👑 Админ</h3>
-        <input class="input" id="adminUserId" placeholder="ID пользователя">
-        <input class="input" id="adminAmount" placeholder="Сумма / Часы">
-        <input class="input" id="adminReason" placeholder="Причина">
-        <button class="btn" onclick="adminAction('userinfo')">👤 Инфо</button>
-        <button class="btn" onclick="adminAction('give')">💰 Выдать</button>
-        <button class="btn" onclick="adminAction('take')">💸 Списать</button>
-        <button class="btn" onclick="adminAction('ban')">🚫 Бан</button>
-        <button class="btn" onclick="adminAction('unban')">✅ Разбан</button>
-        <button class="btn-outline" onclick="closeModal('modalAdmin')">Закрыть</button>
-    </div></div>
+    <!-- Модалка пополнения -->
+    <div class="modal" id="modalDeposit">
+        <div class="modal-content">
+            <h3>🪙 Пополнение баланса</h3>
+            <p style="color:#aaa;">Введите сумму в GRAM (минимум 0.1)</p>
+            <input class="input" type="number" id="depositAmount" placeholder="Например: 10" min="0.1" step="0.1">
+            <p style="color:#888;font-size:12px;margin-top:4px;">От 0.1 GRAM</p>
+            <p style="color:#aaa;font-size:13px;margin:8px 0;">Привяжите кошелёк:</p>
+            <div id="ton-connect-container"></div>
+            <button class="btn" onclick="deposit()">🪙 Пополнить</button>
+            <button class="btn-outline" onclick="closeModal('modalDeposit')">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Модалка успеха -->
+    <div class="modal" id="modalSuccess">
+        <div class="modal-content" style="text-align:center;">
+            <h3 id="successTitle">✅ Готово!</h3>
+            <p id="successText"></p>
+            <button class="btn" onclick="closeModal('modalSuccess')">ОК</button>
+        </div>
+    </div>
+
+    <!-- Модалка админа -->
+    <div class="modal" id="modalAdmin">
+        <div class="modal-content">
+            <h3>👑 Админ-панель</h3>
+            <input class="input" type="number" id="adminUserId" placeholder="ID пользователя">
+            <input class="input" type="text" id="adminAmount" placeholder="Сумма / Часы бана">
+            <input class="input" type="text" id="adminReason" placeholder="Причина бана">
+            <button class="btn" onclick="adminAction('userinfo')">👤 Информация</button>
+            <button class="btn" onclick="adminAction('give')">💰 Выдать GRAM</button>
+            <button class="btn" onclick="adminAction('take')">💸 Списать GRAM</button>
+            <button class="btn" onclick="adminAction('ban')">🚫 Забанить</button>
+            <button class="btn" onclick="adminAction('unban')">✅ Разбанить</button>
+            <button class="btn-outline" onclick="closeModal('modalAdmin')">Закрыть</button>
+        </div>
+    </div>
 
     <script>
-        const tg=window.Telegram.WebApp;tg.expand();
-        const API="https://stargram-0c8j.onrender.com/api";
-        const UID=tg.initDataUnsafe?.user?.id||0;
-        const WALLET="UQBoaCWXtSkgoygDPUns7vHUZFOuwDRzdZ5upaGXsavWzHc9";
-        const AID=[5312114620,8310460385];
-        if(AID.includes(UID))document.getElementById('adminBadge').style.display='inline-block';
+        // === ОСНОВНЫЕ ПЕРЕМЕННЫЕ ===
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-        let ci,tonPrice=3.5,bal=0,st,uf=false;
-        const tc=new TON_CONNECT_UI.TonConnectUI({manifestUrl:'https://alan7ipp.github.io/StarGram/tonconnect-manifest.json',buttonRootId:'ton-connect-container'});
-        const P={stars:{50:0.75,100:1.5,250:3.75,500:7.5,750:11.25,1000:15,2500:37.5,5000:75,10000:150,50000:750,100000:1500,1000000:15000},premium:{3:11.99,6:15.99,12:28.99}};
-        function ug(u){return(u/tonPrice*1.02).toFixed(2)}
+        const API = "https://stargram-0c8j.onrender.com/api";
+        const USER_ID = tg.initDataUnsafe?.user?.id || 0;
+        const WALLET = "UQBoaCWXtSkgoygDPUns7vHUZFOuwDRzdZ5upaGXsavWzHc9";
+        const ADMIN_IDS = [5312114620, 8310460385];
+        const IS_ADMIN = ADMIN_IDS.includes(USER_ID);
 
-        async function lp(){
-            try{tonPrice=(await(await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd')).json())['the-open-network'].usd}catch(e){}
-            let h='';for(let[m,u]of Object.entries(P.premium)){let g=ug(u),l=m==3?'3 месяца':m==6?'6 месяцев':'12 месяцев';h+=`<div class="card" onclick="ob('premium','Premium на ${l}',${g},${m})"><div class="card-left"><span class="card-icon">👑</span><div class="card-info"><h3>Premium на ${l}</h3></div></div><span class="card-price">${g} GRAM</span></div>`}document.getElementById('premium-list').innerHTML=h;h='';[50,100,250,500,750,1000,2500,5000,10000,50000,100000,1000000].forEach(q=>{let g=ug(P.stars[q]);h+=`<div class="card" onclick="ob('stars','${q.toLocaleString()} звёзд',${g},${q})"><div class="card-left"><span class="card-icon">⭐</span><div class="card-info"><h3>${q.toLocaleString()} звёзд</h3></div></div><span class="card-price">${g} GRAM</span></div>`});document.getElementById('stars-list').innerHTML=h}
-        lp();
-
-        async function lb(){try{let r=await fetch(API+'/balance/'+UID);bal=(await r.json()).balance;ud()}catch(e){}}
-        async function lo(){try{let r=await fetch(API+'/orders/'+UID);let o=await r.json();let h='';if(o.length==0)h='Нет заказов';else o.forEach(x=>{h+=`<div class="card"><div class="card-left"><span class="card-icon">${x.status=='completed'?'✅':'⏳'}</span><div class="card-info"><h3>${x.item_name}</h3><p>📩 ${x.recipient}</p></div></div><span class="card-price">${x.amount} GRAM</span></div>`});document.getElementById('orders-list').innerHTML=h}catch(e){}}
-        async function lr(){try{let r=await fetch(API+'/ref/'+UID);let d=await r.json();document.getElementById('refInfo').textContent='Ваша ссылка: '+d.ref_link}catch(e){}}
-        lb();lo();lr();
-
-        document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',function(){
-            document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));this.classList.add('active');
-            document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-            document.getElementById('tab-'+this.dataset.tab).classList.add('active');
-            if(this.dataset.tab=='orders')lo();if(this.dataset.tab=='ref')lr();
-        }));
-
-        async function su(){
-            let v=document.getElementById('recipientInput').value.trim();
-            let rf=document.getElementById('recipientFound'),av=document.getElementById('recipientAvatar'),nm=document.getElementById('recipientName'),et=document.getElementById('errorText'),bb=document.getElementById('btnBuy');
-            if(st)clearTimeout(st);
-            if(v.length<2){rf.classList.remove('show');et.classList.remove('show');bb.disabled=true;uf=false;return}
-            let u=v.startsWith('@')?v.substring(1):v;
-            st=setTimeout(async()=>{
-                try{let r=await fetch(API+'/telegram/user/'+u);let d=await r.json();
-                    if(d.error){rf.classList.remove('show');et.classList.add('show');bb.disabled=true;uf=false}
-                    else{nm.textContent=d.name||u;av.src=d.photo||('data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect fill="%23333" width="48" height="48" rx="24"/><text fill="%23888" x="24" y="30" text-anchor="middle" font-size="22">'+(u[0]||'?').toUpperCase()+'</text></svg>'));rf.classList.add('show');et.classList.remove('show');bb.disabled=false;uf=true}
-                }catch(e){rf.classList.remove('show');et.classList.remove('show');bb.disabled=true;uf=false}
-            },500);
+        if (IS_ADMIN) {
+            document.getElementById('adminBadge').style.display = 'inline-block';
         }
 
-        function fm(){let un=tg.initDataUnsafe?.user?.username;if(un){document.getElementById('recipientInput').value='@'+un;su()}else tg.showAlert('Нет username!')}
-        function ob(t,n,p,q){ci={type:t,name:n,price:p,quantity:q};document.getElementById('modalTitle').textContent='🛒 '+n;document.getElementById('modalPrice').textContent='Цена: '+p+' GRAM | Баланс: '+bal.toFixed(2)+' GRAM';document.getElementById('recipientInput').value='';document.getElementById('recipientFound').classList.remove('show');document.getElementById('errorText').classList.remove('show');document.getElementById('btnBuy').disabled=true;uf=false;document.getElementById('insufficientText').style.display='none';document.getElementById('btnDepositNeeded').style.display='none';if(bal<parseFloat(p)){document.getElementById('insufficientText').textContent='⚠️ Не хватает '+(parseFloat(p)-bal).toFixed(2)+' GRAM';document.getElementById('insufficientText').style.display='block';document.getElementById('btnDepositNeeded').style.display='block'}document.getElementById('modalBuy').classList.add('active');setTimeout(()=>document.getElementById('recipientInput').focus(),300)}
-        function bc(){let q=parseInt(document.getElementById('customStarsQty').value);if(!q||q<50){tg.showAlert('Минимум 50!');return}if(q>1e8){tg.showAlert('Максимум 100M!');return}ob('stars',q.toLocaleString()+' звёзд',ug(q*0.015),q)}
-        function cm(id){document.getElementById(id).classList.remove('active')}
+        let currentItem = null;
+        let tonPrice = 3.5;
+        let userBalance = 0;
+        let searchTimeout = null;
+        let userFound = false;
 
-        async function cb(){
-            if(!uf){tg.showAlert('Найдите получателя!');return}
-            let r=document.getElementById('recipientInput').value.trim();if(!r||!ci)return;
-            let p=parseFloat(ci.price);
-            if(bal>=p){
-                let resp=await fetch(API+'/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tg_id:UID,type:ci.type,name:ci.name,price:ci.price,quantity:ci.quantity,recipient:r,paid_from_balance:true})});
-                let d=await resp.json();
-                if(d.status=='ok'){bal-=p;ud();cm('modalBuy');confetti();ss('✅ Куплено!','🛍 '+ci.name+'\n📩 '+r+'\n💰 -'+p.toFixed(2)+' GRAM')}
-            }else od();
+        // === TON CONNECT ===
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://alan7ipp.github.io/StarGram/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect-container'
+        });
+
+        // === ЦЕНЫ ===
+        const PRICES_USDT = {
+            stars: {
+                50: 0.75,
+                100: 1.50,
+                250: 3.75,
+                500: 7.50,
+                750: 11.25,
+                1000: 15.00,
+                2500: 37.50,
+                5000: 75.00,
+                10000: 150.00,
+                50000: 750.00,
+                100000: 1500.00,
+                1000000: 15000.00
+            },
+            premium: {
+                3: 11.99,
+                6: 15.99,
+                12: 28.99
+            }
+        };
+
+        function usdtToGram(usdt) {
+            return (usdt / tonPrice * 1.02).toFixed(2);
         }
 
-        function od(){document.getElementById('depositAmount').value='';document.getElementById('modalDeposit').classList.add('active')}
-        async function dep(){
-            let a=parseFloat(document.getElementById('depositAmount').value);if(!a||a<0.1){tg.showAlert('Минимум 0.1!');return}
-            if(!tc.wallet){tg.showAlert('Привяжите кошелёк!');return}
-            try{let r=await tc.sendTransaction({validUntil:Math.floor(Date.now()/1000)+300,messages:[{address:WALLET,amount:Math.floor(a*1e9).toString()}]});
-                if(r&&r.boc){let h=r.boc;await fetch(API+'/deposit/confirm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tg_id:UID,amount:a,tx_hash:h})});bal+=a;ud();cm('modalDeposit');confetti();ss('✅ Пополнено!','💰 +'+a+' GRAM')}
-            }catch(e){if(e.message&&e.message.includes('declined'))tg.showAlert('Отменено');else tg.showAlert('Ошибка')}
+        // === ЗАГРУЗКА ЦЕН ===
+        async function loadPrices() {
+            try {
+                const resp = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd');
+                const data = await resp.json();
+                tonPrice = data['the-open-network'].usd;
+            } catch(e) {
+                // оставляем 3.5
+            }
+
+            // Premium список
+            let premiumHTML = '';
+            for (const [months, usdt] of Object.entries(PRICES_USDT.premium)) {
+                const gram = usdtToGram(usdt);
+                let label;
+                if (months == 3) label = '3 месяца';
+                else if (months == 6) label = '6 месяцев';
+                else label = '12 месяцев';
+
+                premiumHTML += `
+                    <div class="card" onclick="openBuy('premium', 'Premium на ${label}', ${gram}, ${months})">
+                        <div class="card-left">
+                            <img class="card-icon" src="https://fragment.com/premium-icon.svg" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" alt="">
+                            <span style="display:none;font-size:28px;">👑</span>
+                            <div class="card-info"><h3>Premium на ${label}</h3></div>
+                        </div>
+                        <span class="card-price">${gram} GRAM</span>
+                    </div>`;
+            }
+            document.getElementById('premium-list').innerHTML = premiumHTML;
+
+            // Stars список
+            let starsHTML = '';
+            const starQtys = [50, 100, 250, 500, 750, 1000, 2500, 5000, 10000, 50000, 100000, 1000000];
+            starQtys.forEach(qty => {
+                const gram = usdtToGram(PRICES_USDT.stars[qty]);
+                starsHTML += `
+                    <div class="card" onclick="openBuy('stars', '${qty.toLocaleString()} звёзд', ${gram}, ${qty})">
+                        <div class="card-left">
+                            <img class="card-icon" src="https://fragment.com/star-icon.svg" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" alt="">
+                            <span style="display:none;font-size:28px;">⭐</span>
+                            <div class="card-info"><h3>${qty.toLocaleString()} звёзд</h3></div>
+                        </div>
+                        <span class="card-price">${gram} GRAM</span>
+                    </div>`;
+            });
+            document.getElementById('stars-list').innerHTML = starsHTML;
         }
 
-        function confetti(){for(let i=0;i<20;i++){let e=document.createElement('div');e.className='confetti';e.textContent=['🎉','⭐','💎','🚀','💰'][Math.floor(Math.random()*5)];e.style.left=Math.random()*100+'%';e.style.top=Math.random()*100+'%';e.style.animationDelay=Math.random()*0.5+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),1500)}}
-
-        function ss(t,tx){document.getElementById('successTitle').textContent=t;document.getElementById('successText').textContent=tx;document.getElementById('modalSuccess').classList.add('active')}
-        function ud(){document.getElementById('balanceDisplay').textContent='🪙 '+bal.toFixed(2)+' GRAM'}
-
-        function oa(){document.getElementById('adminUserId').value='';document.getElementById('adminAmount').value='';document.getElementById('adminReason').value='';document.getElementById('modalAdmin').classList.add('active')}
-        async function aa(act){
-            let uid=parseInt(document.getElementById('adminUserId').value);if(!uid){tg.showAlert('Введите ID!');return}
-            let amt=document.getElementById('adminAmount').value,rsn=document.getElementById('adminReason').value;
-            let r=await fetch(API+'/admin/'+act,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({admin_id:UID,user_id:uid,amount:amt,reason:rsn,hours:act=='ban'?parseFloat(amt):0})});
-            let d=await r.json();
-            if(d.status=='ok'){cm('modalAdmin');tg.showAlert('Готово!')}else{tg.showAlert('Ошибка: '+JSON.stringify(d))}
+        // === ЗАГРУЗКА БАЛАНСА ===
+        async function loadBalance() {
+            try {
+                const resp = await fetch(API + '/balance/' + USER_ID);
+                const data = await resp.json();
+                userBalance = data.balance || 0;
+                updateDisplay();
+            } catch(e) {
+                // баланс 0
+            }
         }
 
-        function copyRefLink(){navigator.clipboard.writeText('https://t.me/StarGramBot?start='+UID);tg.showAlert('Ссылка скопирована!')}
-        ud();
+        // === ЗАГРУЗКА ВСЕГО ===
+        loadPrices();
+        loadBalance();
+
+        // === ТАБЫ (только ползунок двигается) ===
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+            });
+        });
+
+        // === ПОИСК ПОЛУЧАТЕЛЯ ===
+        async function searchUser() {
+            const input = document.getElementById('recipientInput').value.trim();
+            const foundBox = document.getElementById('recipientFound');
+            const avatar = document.getElementById('recipientAvatar');
+            const nameEl = document.getElementById('recipientName');
+            const errorText = document.getElementById('errorText');
+            const buyBtn = document.getElementById('btnBuy');
+
+            if (searchTimeout) clearTimeout(searchTimeout);
+
+            if (input.length < 2) {
+                foundBox.classList.remove('show');
+                errorText.classList.remove('show');
+                buyBtn.disabled = true;
+                userFound = false;
+                return;
+            }
+
+            const username = input.startsWith('@') ? input.substring(1) : input;
+
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const resp = await fetch(API + '/telegram/user/' + username);
+                    const data = await resp.json();
+
+                    if (data.error) {
+                        // Не найден
+                        foundBox.classList.remove('show');
+                        errorText.classList.add('show');
+                        buyBtn.disabled = true;
+                        userFound = false;
+                    } else {
+                        // Найден
+                        nameEl.textContent = data.name || username;
+                        if (data.photo) {
+                            avatar.src = data.photo;
+                            avatar.onerror = function() {
+                                avatar.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect fill="%23333" width="48" height="48" rx="24"/><text fill="%23888" x="24" y="30" text-anchor="middle" font-size="22" font-family="sans-serif">' + (username[0] || '?').toUpperCase() + '</text></svg>');
+                            };
+                        } else {
+                            avatar.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect fill="%23333" width="48" height="48" rx="24"/><text fill="%23888" x="24" y="30" text-anchor="middle" font-size="22" font-family="sans-serif">' + (username[0] || '?').toUpperCase() + '</text></svg>');
+                        }
+                        foundBox.classList.add('show');
+                        errorText.classList.remove('show');
+                        buyBtn.disabled = false;
+                        userFound = true;
+                    }
+                } catch(e) {
+                    foundBox.classList.remove('show');
+                    errorText.classList.remove('show');
+                    buyBtn.disabled = true;
+                    userFound = false;
+                }
+            }, 500);
+        }
+
+        // === ЗАПОЛНИТЬ СВОЙ USERNAME ===
+        function fillMyUsername() {
+            const myUsername = tg.initDataUnsafe?.user?.username;
+            if (myUsername) {
+                document.getElementById('recipientInput').value = '@' + myUsername;
+                searchUser();
+            } else {
+                tg.showAlert('У вас нет username в Telegram!');
+            }
+        }
+
+        // === ОТКРЫТЬ ПОКУПКУ ===
+        function openBuy(type, name, price, quantity) {
+            currentItem = { type: type, name: name, price: price, quantity: quantity };
+
+            document.getElementById('modalTitle').textContent = '🛒 ' + name;
+            document.getElementById('modalPrice').textContent = 'Цена: ' + price + ' GRAM | Баланс: ' + userBalance.toFixed(2) + ' GRAM';
+            document.getElementById('recipientInput').value = '';
+            document.getElementById('recipientFound').classList.remove('show');
+            document.getElementById('errorText').classList.remove('show');
+            document.getElementById('btnBuy').disabled = true;
+            document.getElementById('insufficientText').style.display = 'none';
+            document.getElementById('btnDepositNeeded').style.display = 'none';
+            document.getElementById('btnBuy').style.display = 'block';
+            userFound = false;
+
+            const priceNum = parseFloat(price);
+            if (userBalance < priceNum) {
+                const needed = (priceNum - userBalance).toFixed(2);
+                document.getElementById('insufficientText').textContent = '⚠️ Не хватает ' + needed + ' GRAM';
+                document.getElementById('insufficientText').style.display = 'block';
+                document.getElementById('btnDepositNeeded').style.display = 'block';
+            }
+
+            document.getElementById('modalBuy').classList.add('active');
+            setTimeout(function() {
+                document.getElementById('recipientInput').focus();
+            }, 300);
+        }
+
+        // === КУПИТЬ СВОЁ КОЛИЧЕСТВО ===
+        function buyCustomStars() {
+            const qty = parseInt(document.getElementById('customStarsQty').value);
+            if (!qty || qty < 50) {
+                tg.showAlert('Минимум 50 звёзд!');
+                return;
+            }
+            if (qty > 100000000) {
+                tg.showAlert('Максимум 100 000 000 звёзд!');
+                return;
+            }
+            const usdt = qty * 0.015;
+            openBuy('stars', qty.toLocaleString() + ' звёзд', usdtToGram(usdt), qty);
+        }
+
+        // === ЗАКРЫТЬ МОДАЛКУ ===
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // === ПОДТВЕРДИТЬ ПОКУПКУ ===
+        async function confirmBuy() {
+            if (!userFound) {
+                tg.showAlert('Сначала найдите получателя!');
+                return;
+            }
+
+            const recipient = document.getElementById('recipientInput').value.trim();
+            if (!recipient) {
+                tg.showAlert('Введите username получателя!');
+                return;
+            }
+            if (!currentItem) return;
+
+            const price = parseFloat(currentItem.price);
+
+            if (userBalance >= price) {
+                const resp = await fetch(API + '/order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tg_id: USER_ID,
+                        type: currentItem.type,
+                        name: currentItem.name,
+                        price: currentItem.price,
+                        quantity: currentItem.quantity,
+                        recipient: recipient,
+                        paid_from_balance: true
+                    })
+                });
+                const result = await resp.json();
+
+                if (result.status === 'ok') {
+                    userBalance -= price;
+                    updateDisplay();
+                    closeModal('modalBuy');
+                    showConfetti();
+                    showSuccess('✅ Покупка совершена!',
+                        '🛍 ' + currentItem.name + '\n📩 ' + recipient + '\n💰 С баланса: -' + price.toFixed(2) + ' GRAM\n\nУведомление отправлено в ЛС');
+                }
+            } else {
+                openDeposit();
+            }
+        }
+
+        // === ПОПОЛНЕНИЕ ===
+        function openDeposit() {
+            document.getElementById('depositAmount').value = '';
+            document.getElementById('modalDeposit').classList.add('active');
+        }
+
+        async function deposit() {
+            const amount = parseFloat(document.getElementById('depositAmount').value);
+            if (!amount || amount < 0.1) {
+                tg.showAlert('Минимум 0.1 GRAM!');
+                return;
+            }
+
+            const wallet = tonConnectUI.wallet;
+            if (!wallet) {
+                tg.showAlert('Сначала привяжите кошелёк! Нажмите кнопку Tonkeeper выше.');
+                return;
+            }
+
+            const nanoAmount = Math.floor(amount * 1_000_000_000);
+
+            try {
+                const result = await tonConnectUI.sendTransaction({
+                    validUntil: Math.floor(Date.now() / 1000) + 300,
+                    messages: [{
+                        address: WALLET,
+                        amount: nanoAmount.toString()
+                    }]
+                });
+
+                if (result && result.boc) {
+                    const txHash = result.boc;
+                    await fetch(API + '/deposit/confirm', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            tg_id: USER_ID,
+                            amount: amount,
+                            tx_hash: txHash
+                        })
+                    });
+
+                    userBalance += amount;
+                    updateDisplay();
+                    closeModal('modalDeposit');
+                    showConfetti();
+                    showSuccess('✅ Баланс пополнен!',
+                        '💰 +' + amount + ' GRAM\nБаланс: ' + userBalance.toFixed(2) + ' GRAM');
+                }
+            } catch(e) {
+                if (e.message && e.message.includes('declined')) {
+                    tg.showAlert('Платёж отменён. Баланс не изменён.');
+                } else {
+                    tg.showAlert('Ошибка транзакции. Попробуйте снова.');
+                }
+            }
+        }
+
+        // === АНИМАЦИЯ КОНФЕТТИ ===
+        function showConfetti() {
+            const emojis = ['🎉', '⭐', '💎', '🚀', '💰', '✨'];
+            for (let i = 0; i < 25; i++) {
+                setTimeout(function() {
+                    const piece = document.createElement('div');
+                    piece.className = 'confetti-piece';
+                    piece.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    piece.style.left = (10 + Math.random() * 80) + '%';
+                    piece.style.top = (30 + Math.random() * 40) + '%';
+                    piece.style.animationDelay = Math.random() * 0.3 + 's';
+                    document.body.appendChild(piece);
+                    setTimeout(function() { piece.remove(); }, 1500);
+                }, i * 30);
+            }
+        }
+
+        // === ПОКАЗАТЬ УСПЕХ ===
+        function showSuccess(title, text) {
+            document.getElementById('successTitle').textContent = title;
+            document.getElementById('successText').textContent = text;
+            document.getElementById('modalSuccess').classList.add('active');
+        }
+
+        // === ОБНОВИТЬ БАЛАНС ===
+        function updateDisplay() {
+            document.getElementById('balanceDisplay').textContent = '🪙 ' + userBalance.toFixed(2) + ' GRAM';
+        }
+
+        // === АДМИН-ПАНЕЛЬ ===
+        function openAdmin() {
+            if (!IS_ADMIN) return;
+            document.getElementById('adminUserId').value = '';
+            document.getElementById('adminAmount').value = '';
+            document.getElementById('adminReason').value = '';
+            document.getElementById('modalAdmin').classList.add('active');
+        }
+
+        async function adminAction(action) {
+            const uid = parseInt(document.getElementById('adminUserId').value);
+            if (!uid) {
+                tg.showAlert('Введите ID пользователя!');
+                return;
+            }
+
+            const amount = document.getElementById('adminAmount').value;
+            const reason = document.getElementById('adminReason').value;
+
+            try {
+                const resp = await fetch(API + '/admin/' + action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        admin_id: USER_ID,
+                        user_id: uid,
+                        amount: amount,
+                        reason: reason,
+                        hours: action === 'ban' ? parseFloat(amount) : 0
+                    })
+                });
+
+                const data = await resp.json();
+
+                if (data.status === 'ok') {
+                    closeModal('modalAdmin');
+                    tg.showAlert('✅ Команда выполнена!');
+                } else if (data.error === 'not found') {
+                    tg.showAlert('Пользователь не найден!');
+                } else {
+                    tg.showAlert('Ошибка: ' + JSON.stringify(data));
+                }
+            } catch(e) {
+                tg.showAlert('Ошибка связи с сервером');
+            }
+        }
+
+        // === ИНИЦИАЛИЗАЦИЯ ===
+        updateDisplay();
     </script>
 </body>
 </html>
