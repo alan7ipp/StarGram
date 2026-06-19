@@ -135,9 +135,10 @@
             align-items: center;
             gap: 10px;
         }
-        .card-icon {
-            width: 32px;
-            height: 32px;
+        .card-icon-svg {
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
         }
         .card-info h3 {
             font-size: 15px;
@@ -465,6 +466,44 @@
             return (usdt / tonPrice * 1.02).toFixed(2);
         }
 
+        // === SVG ИКОНКИ (КАК В TELEGRAM) ===
+        // Золотая звезда Telegram Stars
+        function getStarSVG() {
+            return '<svg width="36" height="36" viewBox="0 0 36 36">' +
+                '<defs>' +
+                '<linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
+                '<stop offset="0%" style="stop-color:#FFE55C"/>' +
+                '<stop offset="50%" style="stop-color:#FFD700"/>' +
+                '<stop offset="100%" style="stop-color:#FFA500"/>' +
+                '</linearGradient>' +
+                '<filter id="starGlow">' +
+                '<feGaussianBlur stdDeviation="0.8" result="blur"/>' +
+                '<feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>' +
+                '</filter>' +
+                '</defs>' +
+                '<polygon points="18,2 22,13 34,14 25,21 27,33 18,26 9,33 11,21 2,14 14,13" fill="url(#starGrad)" stroke="#DAA520" stroke-width="1.2" filter="url(#starGlow)"/>' +
+                '</svg>';
+        }
+
+        // Иконка Telegram Premium (золотой круг с звездой)
+        function getPremiumSVG() {
+            return '<svg width="36" height="36" viewBox="0 0 36 36">' +
+                '<defs>' +
+                '<linearGradient id="premGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
+                '<stop offset="0%" style="stop-color:#FFD700"/>' +
+                '<stop offset="50%" style="stop-color:#FFF8DC"/>' +
+                '<stop offset="100%" style="stop-color:#FFD700"/>' +
+                '</linearGradient>' +
+                '<filter id="premGlow">' +
+                '<feGaussianBlur stdDeviation="1" result="blur"/>' +
+                '<feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>' +
+                '</filter>' +
+                '</defs>' +
+                '<circle cx="18" cy="18" r="15" fill="url(#premGrad)" stroke="#DAA520" stroke-width="2" filter="url(#premGlow)"/>' +
+                '<polygon points="18,8 20,15 27,16 21,20 23,28 18,24 13,28 15,20 9,16 16,15" fill="#FFF" opacity="0.95"/>' +
+                '</svg>';
+        }
+
         // === ЗАГРУЗКА ЦЕН ===
         async function loadPrices() {
             try {
@@ -487,8 +526,7 @@
                 premiumHTML += `
                     <div class="card" onclick="openBuy('premium', 'Premium на ${label}', ${gram}, ${months})">
                         <div class="card-left">
-                            <img class="card-icon" src="https://fragment.com/premium-icon.svg" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" alt="">
-                            <span style="display:none;font-size:28px;">👑</span>
+                            <span class="card-icon-svg">${getPremiumSVG()}</span>
                             <div class="card-info"><h3>Premium на ${label}</h3></div>
                         </div>
                         <span class="card-price">${gram} GRAM</span>
@@ -504,8 +542,7 @@
                 starsHTML += `
                     <div class="card" onclick="openBuy('stars', '${qty.toLocaleString()} звёзд', ${gram}, ${qty})">
                         <div class="card-left">
-                            <img class="card-icon" src="https://fragment.com/star-icon.svg" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" alt="">
-                            <span style="display:none;font-size:28px;">⭐</span>
+                            <span class="card-icon-svg">${getStarSVG()}</span>
                             <div class="card-info"><h3>${qty.toLocaleString()} звёзд</h3></div>
                         </div>
                         <span class="card-price">${gram} GRAM</span>
