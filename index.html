@@ -30,7 +30,8 @@
         .balance-badge:active { transform: scale(0.95); }
         .admin-badge { background: var(--accent-gold-bg); border: 1px solid rgba(245, 197, 66, 0.3); color: var(--accent-gold); border-radius: 20px; padding: 6px 12px; font-size: 13px; font-weight: 600; cursor: pointer; display: none; align-items: center; gap: 4px; transition: transform 0.1s; }
         .admin-badge:active { transform: scale(0.95); }
-        .coin-icon { width: 18px; height: 18px; object-fit: contain; flex-shrink: 0; }
+        .coin-icon { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
+        .coin-icon-small { width: 18px; height: 18px; object-fit: contain; flex-shrink: 0; }
         .tabs-wrapper { margin-bottom: 20px; padding-bottom: 4px; }
         .tabs { display: flex; gap: 10px; }
         .tab { flex: 1; text-align: center; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s; display: flex; justify-content: center; align-items: center; gap: 6px; }
@@ -53,7 +54,6 @@
         .card-left { display: flex; align-items: center; gap: 14px; }
         .card-info h3 { font-size: 16px; font-weight: 600; color: var(--text-main); }
         .card-price { font-size: 15px; font-weight: 700; color: var(--accent-green); display: flex; align-items: center; gap: 4px; }
-        .card-price .coin-icon-small { width: 16px; height: 16px; object-fit: contain; }
         .custom-input { display: flex; gap: 8px; margin-top: 16px; }
         .input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); font-size: 15px; outline: none; transition: border-color 0.2s; }
         .input:focus { border-color: var(--accent-gold); }
@@ -245,12 +245,13 @@
     function openBuy(t, n, p, q) {
         currentItem = { type: t, name: n, price: p, quantity: q };
         document.getElementById('modalTitle').textContent = n;
-        document.getElementById('modalPrice').innerHTML = `${getCoinIcon('coin-icon')} ${p} <br><span style="font-size:13px;color:#8e8e93;font-weight:normal;">Доступно: ${getCoinIcon('coin-icon-small')} ${userBalance.toFixed(2)}</span>`;
+        // Без монетки — просто текст
+        document.getElementById('modalPrice').innerHTML = `${p} GRAM<br><span style="font-size:13px;color:#8e8e93;font-weight:normal;">Доступно: ${userBalance.toFixed(2)} GRAM</span>`;
         document.getElementById('recipientInput').value = ''; document.getElementById('recipientFound').classList.remove('show'); document.getElementById('errorText').classList.remove('show');
         document.getElementById('btnBuy').disabled = true; document.getElementById('insufficientText').style.display = 'none'; document.getElementById('btnDepositNeeded').style.display = 'none'; document.getElementById('btnBuy').style.display = 'block';
         userFound = false;
         const pn = parseFloat(p);
-        if (userBalance < pn) { document.getElementById('insufficientText').textContent = '⚠️ Не хватает ' + (pn - userBalance).toFixed(2); document.getElementById('insufficientText').style.display = 'block'; document.getElementById('btnDepositNeeded').style.display = 'block'; document.getElementById('btnBuy').style.display = 'none'; }
+        if (userBalance < pn) { document.getElementById('insufficientText').textContent = '⚠️ Не хватает ' + (pn - userBalance).toFixed(2) + ' GRAM'; document.getElementById('insufficientText').style.display = 'block'; document.getElementById('btnDepositNeeded').style.display = 'block'; document.getElementById('btnBuy').style.display = 'none'; }
         document.getElementById('modalBuy').classList.add('active'); setTimeout(() => document.getElementById('recipientInput').focus(), 300);
     }
 
@@ -264,7 +265,7 @@
         if (userBalance >= p) {
             const resp = await fetch(API + '/order', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ tg_id:USER_ID, type:currentItem.type, name:currentItem.name, price:currentItem.price, quantity:currentItem.quantity, recipient:r, paid_from_balance:true }) });
             const d = await resp.json();
-            if (d.status === 'ok') { userBalance -= p; updateDisplay(); closeModal('modalBuy'); showStarsConfetti(); showSuccess('✅ Покупка совершена!', '🛍 ' + currentItem.name + '\n📩 ' + r + '\n💰 -' + p.toFixed(2)); }
+            if (d.status === 'ok') { userBalance -= p; updateDisplay(); closeModal('modalBuy'); showStarsConfetti(); showSuccess('✅ Покупка совершена!', '🛍 ' + currentItem.name + '\n📩 ' + r + '\n💰 -' + p.toFixed(2) + ' GRAM'); }
         } else openDeposit();
     }
 
@@ -274,7 +275,7 @@
         if (!tonConnectUI.wallet) return tg.showAlert('Привяжите кошелёк!');
         try {
             const r = await tonConnectUI.sendTransaction({ validUntil: Math.floor(Date.now()/1000)+300, messages:[{ address: WALLET, amount: Math.floor(a*1e9).toString() }] });
-            if (r && r.boc) { await fetch(API + '/deposit/confirm', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ tg_id:USER_ID, amount:a, tx_hash:r.boc }) }); userBalance += a; updateDisplay(); closeModal('modalDeposit'); showStarsConfetti(); showSuccess('✅ Пополнено!', '💰 +' + a); }
+            if (r && r.boc) { await fetch(API + '/deposit/confirm', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ tg_id:USER_ID, amount:a, tx_hash:r.boc }) }); userBalance += a; updateDisplay(); closeModal('modalDeposit'); showStarsConfetti(); showSuccess('✅ Пополнено!', '💰 +' + a + ' GRAM'); }
         } catch(e) { tg.showAlert('Платёж отменён или ошибка.'); }
     }
 
